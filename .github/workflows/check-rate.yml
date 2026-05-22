@@ -1,0 +1,105 @@
+name: Sampath Bank USD Rate Monitor
+
+on:
+  # ── Run every 30 minutes ─────────────────────────────────────────────────
+  schedule:
+    - cron: "0,30 * * * *"   # every 30 min — change to "*/15 * * * *" for every 15 min
+
+  # ── Also allow manual trigger from GitHub Actions UI ────────────────────
+  workflow_dispatch:
+
+jobs:
+  fetch-sampath:
+    name: Fetch Sampath Rate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          # no pip cache needed for this small script
+
+      - name: Fetch Sampath rate
+        run: python fetch_sampath.py
+
+      - name: Upload Sampath artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sampath-rate
+          path: output/sampath.json
+
+  fetch-hnb:
+    name: Fetch HNB Rate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          # no pip cache needed for this small script
+
+      - name: Fetch HNB rate
+        run: python fetch_hnb.py
+
+      - name: Upload HNB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hnb-rate
+          path: output/hnb.json
+
+  notify:
+    name: Send Notifications
+    runs-on: ubuntu-latest
+    needs:
+      - fetch-sampath
+      - fetch-hnb
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download Sampath artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: sampath-rate
+          path: output
+
+      - name: Download HNB artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: hnb-rate
+          path: output
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          # no pip cache needed for this small script
+
+      - name: Send notifications
+        env:
+          ALERT_METHOD: ${{ secrets.ALERT_METHOD }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          NTFY_TOPIC_SAMPATH: ${{ secrets.NTFY_TOPIC_SAMPATH }}
+          NTFY_TOPIC_HNB: ${{ secrets.NTFY_TOPIC_HNB }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID:   ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python notify.py
+
+      - name: Log result summary
+        if: always()
+        run: |
+          echo "### Rate Check Complete" >> $GITHUB_STEP_SUMMARY
+          echo "- **Time (SL):** $(TZ='Asia/Colombo' date)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Alert method:** ${{ secrets.ALERT_METHOD }}" >> $GITHUB_STEP_SUMMARY
