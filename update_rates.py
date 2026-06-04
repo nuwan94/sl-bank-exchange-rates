@@ -27,6 +27,71 @@ def fetch_raw(url: str, headers: dict | None = None):
     return None
 
 
+def parse_sampath_rates(data):
+    rates = {}
+    if isinstance(data, dict):
+        items = data.get("data") or data.get("rates") or data.get("exchangeRates") or []
+    else:
+        items = data or []
+
+    if not isinstance(items, list):
+        return rates
+
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+
+        lower = { (k or "").lower(): v for k, v in item.items() }
+        code = (
+            lower.get("currency")
+            or lower.get("currencycode")
+            or lower.get("currcode")
+            or lower.get("curr")
+            or ""
+        )
+        if not isinstance(code, str):
+            continue
+        code = code.strip().upper()
+        if not code:
+            continue
+
+        rate_val = (
+            lower.get("ttbuy")
+            or lower.get("ttbuying")
+            or lower.get("tt_buying")
+            or lower.get("buying")
+            or lower.get("buyingrate")
+            or lower.get("ttsel")
+            or lower.get("sellingrate")
+        )
+        if rate_val is None:
+            continue
+        try:
+            rates[code] = float(str(rate_val).strip())
+        except Exception:
+            continue
+    return rates
+
+
+def parse_hnb_rates(data):
+    rates = {}
+    if not isinstance(data, list):
+        return rates
+
+    for item in data:
+        if not isinstance(item, dict):
+            continue
+        code = item.get("currencyCode")
+        rate_val = item.get("buyingRate")
+        if not isinstance(code, str) or rate_val is None:
+            continue
+        try:
+            rates[code.strip().upper()] = float(rate_val)
+        except Exception:
+            continue
+    return rates
+
+
 def main():
     out_dir = Path("web/data")
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -44,7 +109,6 @@ def main():
         "Accept": "application/json",
     })
 
-    # also include parsed USD rates using existing helpers
     parsed = {}
     try:
         parsed["sampath"] = fetch_sampath_rate()
@@ -58,6 +122,11 @@ def main():
         parsed["hnb"] = None
         print(f"Could not parse HNB USD rate: {e}")
 
+    rates = {
+        "sampath": parse_sampath_rates(sampath_raw),
+        "hnb": parse_hnb_rates(hnb_raw),
+    }
+
     payload = {
         "fetched_at": fetched_at,
         "sources": {
@@ -65,6 +134,7 @@ def main():
             "hnb": hnb_raw,
         },
         "parsed": parsed,
+        "rates": rates,
     }
 
     path = out_dir / "rates.json"

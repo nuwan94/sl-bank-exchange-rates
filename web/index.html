@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>USD Rates</title>
+    <title>Bank Exchange Rates</title>
     <style>
       body { font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; padding: 1rem; }
       table { border-collapse: collapse; width: 100%; max-width: 900px; }
@@ -13,7 +13,7 @@
     </style>
   </head>
   <body>
-    <h1>USD Rates</h1>
+    <h1>Bank Exchange Rates</h1>
     <div id="app">Loading…</div>
 
     <script type="module">
@@ -24,29 +24,49 @@
       function App() {
         const root = document.createElement('div');
 
+        function formatRate(value) {
+          return value == null ? '—' : Number(value).toFixed(2);
+        }
+
         async function load() {
           try {
             const res = await fetch('./data/rates.json', { cache: 'no-store' });
             if (!res.ok) throw new Error(await res.text());
             const data = await res.json();
 
-            const parsed = data.parsed || {};
             const fetched = data.fetched_at || 'unknown';
+            const rates = data.rates || {};
+            const sampathRates = rates.sampath || {};
+            const hnbRates = rates.hnb || {};
+
+            const currencies = Array.from(
+              new Set([
+                ...Object.keys(sampathRates),
+                ...Object.keys(hnbRates),
+              ])
+            ).sort();
 
             render(html`
               <div>
                 <p><strong>Fetched:</strong> ${fetched}</p>
                 <table>
                   <thead>
-                    <tr><th>Source</th><th>USD Rate (parsed)</th></tr>
+                    <tr>
+                      <th>Currency</th>
+                      <th>Sampath</th>
+                      <th>HNB</th>
+                    </tr>
                   </thead>
                   <tbody>
-                    <tr><td>Sampath</td><td>${parsed.sampath ?? '—'}</td></tr>
-                    <tr><td>HNB</td><td>${parsed.hnb ?? '—'}</td></tr>
+                    ${currencies.map(code => html`
+                      <tr>
+                        <td>${code}</td>
+                        <td>${formatRate(sampathRates[code])}</td>
+                        <td>${formatRate(hnbRates[code])}</td>
+                      </tr>
+                    `)}
                   </tbody>
                 </table>
-                <h3>Raw JSON</h3>
-                <pre>${JSON.stringify(data, null, 2)}</pre>
               </div>
             `, root);
           } catch (err) {
