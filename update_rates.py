@@ -28,7 +28,7 @@ def fetch_raw(url: str, headers: dict | None = None):
 
 
 def main():
-    out_dir = Path("data")
+    out_dir = Path("web/data")
     out_dir.mkdir(parents=True, exist_ok=True)
 
     now = datetime.now(ZoneInfo("Asia/Colombo"))
