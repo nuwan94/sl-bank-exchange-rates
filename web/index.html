@@ -1,20 +1,23 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Bank Exchange Rates</title>
-    <style>
-      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; padding: 1rem; }
-      table { border-collapse: collapse; width: 100%; max-width: 900px; }
-      th, td { padding: 8px 12px; border: 1px solid #ddd; text-align: left; }
-      th { background: #f7f7f7; }
-      pre { background:#f5f5f5; padding:12px; overflow:auto }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@latest/dist/full.min.css" rel="stylesheet" type="text/css" />
   </head>
   <body>
-    <h1>Bank Exchange Rates</h1>
-    <div id="app">Loading…</div>
+    <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
+      <div class="max-w-4xl mx-auto">
+        <div class="card bg-white shadow-lg">
+          <div class="card-body">
+            <h1 class="card-title text-3xl mb-6">Bank Exchange Rates</h1>
+            <div id="app">Loading…</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <script type="module">
       import { h, render } from 'https://unpkg.com/preact@10.11.0?module';
@@ -23,6 +26,36 @@
 
       function App() {
         const root = document.createElement('div');
+
+        const currencyNames = {
+          'USD': 'United States Dollar',
+          'EUR': 'Euro',
+          'GBP': 'British Pound',
+          'JPY': 'Japanese Yen',
+          'AUD': 'Australian Dollar',
+          'CAD': 'Canadian Dollar',
+          'SGD': 'Singapore Dollar',
+          'HKD': 'Hong Kong Dollar',
+          'NZD': 'New Zealand Dollar',
+          'CHF': 'Swiss Franc',
+          'CNY': 'Chinese Yuan',
+          'INR': 'Indian Rupee',
+          'MYR': 'Malaysian Ringgit',
+          'THB': 'Thai Baht',
+          'IDR': 'Indonesian Rupiah',
+          'PHP': 'Philippine Peso',
+          'VND': 'Vietnamese Dong',
+          'KRW': 'South Korean Won',
+          'TWD': 'Taiwan Dollar',
+          'SEK': 'Swedish Krona',
+          'NOK': 'Norwegian Krone',
+          'DKK': 'Danish Krone',
+        };
+
+        function getCurrencyLabel(code) {
+          const name = currencyNames[code] || code;
+          return `${name} (${code})`;
+        }
 
         function formatRate(value) {
           return value == null ? '—' : Number(value).toFixed(2);
@@ -39,38 +72,70 @@
             const sampathRates = rates.sampath || {};
             const hnbRates = rates.hnb || {};
 
-            const currencies = Array.from(
+            let currencies = Array.from(
               new Set([
                 ...Object.keys(sampathRates),
                 ...Object.keys(hnbRates),
               ])
             ).sort();
 
+            // Move USD and EUR to top
+            const priority = ['USD', 'EUR'];
+            currencies = [
+              ...priority.filter(c => currencies.includes(c)),
+              ...currencies.filter(c => !priority.includes(c))
+            ];
+
             render(html`
               <div>
-                <p><strong>Fetched:</strong> ${fetched}</p>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Currency</th>
-                      <th>Sampath</th>
-                      <th>HNB</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    ${currencies.map(code => html`
-                      <tr>
-                        <td>${code}</td>
-                        <td>${formatRate(sampathRates[code])}</td>
-                        <td>${formatRate(hnbRates[code])}</td>
-                      </tr>
-                    `)}
-                  </tbody>
-                </table>
+                <div class="mb-4 text-sm text-gray-600">
+                  <strong>Last Updated:</strong> ${new Date(fetched).toLocaleString()}
+                </div>
+
+                <div role="tablist" class="tabs tabs-bordered">
+                  <input type="radio" name="rate_tabs" role="tab" class="tab" aria-label="Rates" checked />
+                  <div role="tabpanel" class="tab-content p-0">
+                    <div class="overflow-x-auto">
+                      <table class="table table-zebra w-full">
+                        <thead>
+                          <tr class="bg-gray-100">
+                            <th class="text-left">Currency</th>
+                            <th class="text-right">Sampath</th>
+                            <th class="text-right">HNB</th>
+                            <th class="text-right">Difference</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          ${currencies.map(code => {
+                            const sp = sampathRates[code];
+                            const hnb = hnbRates[code];
+                            const diff = (sp != null && hnb != null) ? (sp - hnb).toFixed(2) : '—';
+                            return html`
+                              <tr>
+                                <td class="font-semibold">${getCurrencyLabel(code)}</td>
+                                <td class="text-right">${formatRate(sp)}</td>
+                                <td class="text-right">${formatRate(hnb)}</td>
+                                <td class="text-right text-sm ${diff !== '—' && parseFloat(diff) > 0 ? 'text-green-600 font-semibold' : diff !== '—' && parseFloat(diff) < 0 ? 'text-red-600 font-semibold' : ''}">${diff}</td>
+                              </tr>
+                            `;
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  <input type="radio" name="rate_tabs" role="tab" class="tab" aria-label="Charts" />
+                  <div role="tabpanel" class="tab-content p-6">
+                    <div class="text-center text-gray-500 py-12">
+                      <p class="text-lg">📊 Charts coming soon</p>
+                      <p class="text-sm mt-2">Historical rate trends and analysis will be available here</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             `, root);
           } catch (err) {
-            render(html`<div style="color:crimson">Error loading data: ${err.message}</div>`, root);
+            render(html`<div class="alert alert-error">${err.message}</div>`, root);
           }
         }
 
@@ -83,3 +148,4 @@
     </script>
   </body>
 </html>
+
