@@ -9,23 +9,21 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: github-pages
 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Upload pages artifact
-        uses: actions/upload-pages-artifact@v5
+      - name: Deploy web app to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: web
-
-      - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v5
+          publish_dir: web
+          publish_branch: gh-pages
+          keep_files: false
+          allow_empty_commit: false
+          github_token: ${{ secrets.GITHUB_TOKEN }}
