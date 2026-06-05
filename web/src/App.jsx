@@ -66,7 +66,6 @@ export default function App() {
 
   return (
     <div className="space-y-5">
-      <PageHeader fetchedAt={fetchedAt} />
       <TabNav activeTab={activeTab} onTabChange={setActiveTab} />
 
       <div className={activeTab !== TAB_RATES ? 'hidden' : ''}>
@@ -83,6 +82,9 @@ export default function App() {
       <div className={activeTab !== TAB_CHARTS ? 'hidden' : ''}>
         <ChartSection loading={loading} entries={historyEntries} />
       </div>
+
+            <PageHeader fetchedAt={fetchedAt} />
+
     </div>
   );
 }
