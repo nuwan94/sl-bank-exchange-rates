@@ -141,6 +141,50 @@ def main():
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"✅ Written {path}")
 
+    # Track historical changes
+    history_path = out_dir / "history.json"
+    history = {}
+    if history_path.exists():
+        try:
+            history = json.loads(history_path.read_text(encoding="utf-8"))
+        except Exception as e:
+            print(f"⚠️  Could not read history: {e}")
+
+    # Check if rates changed and log new entry
+    changed = False
+    if "latest" not in history:
+        history["latest"] = rates
+        changed = True
+    else:
+        latest = history["latest"]
+        # Check if any rate changed
+        for bank in ["sampath", "hnb"]:
+            if rates.get(bank) != latest.get(bank):
+                changed = True
+                break
+
+    if changed:
+        if "entries" not in history:
+            history["entries"] = []
+        
+        history["entries"].append({
+            "timestamp": fetched_at,
+            "rates": rates,
+        })
+        
+        # Keep only last 7 days of entries
+        cutoff_time = datetime.fromisoformat(fetched_at).timestamp() - (7 * 24 * 3600)
+        history["entries"] = [
+            e for e in history["entries"]
+            if datetime.fromisoformat(e["timestamp"]).timestamp() > cutoff_time
+        ]
+        
+        history["latest"] = rates
+        history_path.write_text(json.dumps(history, ensure_ascii=False, indent=2), encoding="utf-8")
+        print(f"✅ Logged rate change to {history_path}")
+    else:
+        print("ℹ️  No rate changes detected")
+
 
 if __name__ == "__main__":
     main()

@@ -6,6 +6,7 @@
     <title>Bank Exchange Rates</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@latest/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   </head>
   <body>
     <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
@@ -61,6 +62,22 @@
           return value == null ? '—' : Number(value).toFixed(2);
         }
 
+        function getErrorMessage(err) {
+          if (err == null) return 'Unknown error';
+          return typeof err === 'string' ? err : err.message || String(err);
+        }
+
+        function setActiveTab(activeTab) {
+          const buttons = root.querySelectorAll('[data-tab]');
+          buttons.forEach(button => {
+            button.classList.toggle('tab-active', button.dataset.tab === activeTab);
+          });
+          const panels = root.querySelectorAll('.tab-panel');
+          panels.forEach(panel => {
+            panel.classList.toggle('hidden', panel.id !== `tab-${activeTab}`);
+          });
+        }
+
         async function load() {
           try {
             const res = await fetch('./data/rates.json', { cache: 'no-store' });
@@ -92,55 +109,137 @@
                   <strong>Last Updated:</strong> ${new Date(fetched).toLocaleString()}
                 </div>
 
-                <div role="tablist" class="tabs tabs-bordered">
-                  <input type="radio" name="rate_tabs" role="tab" class="tab" aria-label="Rates" checked />
-                  <div role="tabpanel" class="tab-content p-0">
-                    <div class="overflow-x-auto">
-                      <table class="table table-zebra w-full">
-                        <thead>
-                          <tr class="bg-gray-100">
-                            <th class="text-left">Currency</th>
-                            <th class="text-right">Sampath</th>
-                            <th class="text-right">HNB</th>
-                            <th class="text-right">Difference</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          ${currencies.map(code => {
-                            const sp = sampathRates[code];
-                            const hnb = hnbRates[code];
-                            const diff = (sp != null && hnb != null) ? (sp - hnb).toFixed(2) : '—';
-                            return html`
-                              <tr>
-                                <td class="font-semibold">${getCurrencyLabel(code)}</td>
-                                <td class="text-right">${formatRate(sp)}</td>
-                                <td class="text-right">${formatRate(hnb)}</td>
-                                <td class="text-right text-sm ${diff !== '—' && parseFloat(diff) > 0 ? 'text-green-600 font-semibold' : diff !== '—' && parseFloat(diff) < 0 ? 'text-red-600 font-semibold' : ''}">${diff}</td>
-                              </tr>
-                            `;
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
+                <div class="tabs tabs-boxed mb-4">
+                  <button type="button" class="tab tab-active" data-tab="rates">Rates</button>
+                  <button type="button" class="tab" data-tab="charts">Charts</button>
+                </div>
 
-                  <input type="radio" name="rate_tabs" role="tab" class="tab" aria-label="Charts" />
-                  <div role="tabpanel" class="tab-content p-6">
+                <div id="tab-rates" class="tab-panel">
+                  <div class="overflow-x-auto">
+                    <table class="table table-zebra w-full">
+                      <thead>
+                        <tr class="bg-gray-100">
+                          <th class="text-left">Currency</th>
+                          <th class="text-right">Sampath</th>
+                          <th class="text-right">HNB</th>
+                          <th class="text-right">Difference</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        ${currencies.map(code => {
+                          const sp = sampathRates[code];
+                          const hnb = hnbRates[code];
+                          const diff = (sp != null && hnb != null) ? (sp - hnb).toFixed(2) : '—';
+                          return html`
+                            <tr>
+                              <td class="font-semibold">${getCurrencyLabel(code)}</td>
+                              <td class="text-right">${formatRate(sp)}</td>
+                              <td class="text-right">${formatRate(hnb)}</td>
+                              <td class="text-right text-sm ${diff !== '—' && parseFloat(diff) > 0 ? 'text-green-600 font-semibold' : diff !== '—' && parseFloat(diff) < 0 ? 'text-red-600 font-semibold' : ''}">${diff}</td>
+                            </tr>
+                          `;
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div id="tab-charts" class="tab-panel hidden p-6">
+                  <div id="chart-container" class="w-full">
                     <div class="text-center text-gray-500 py-12">
-                      <p class="text-lg">📊 Charts coming soon</p>
-                      <p class="text-sm mt-2">Historical rate trends and analysis will be available here</p>
+                      <p class="text-lg">📊 Loading chart data...</p>
                     </div>
                   </div>
                 </div>
               </div>
             `, root);
+
+            setActiveTab('rates');
+
+            // Wire tab buttons
+            root.querySelectorAll('[data-tab]').forEach(button => {
+              button.addEventListener('click', () => setActiveTab(button.dataset.tab));
+            });
+
+            // Load and render chart after DOM is ready
+            setTimeout(() => loadChart(), 100);
           } catch (err) {
-            render(html`<div class="alert alert-error">${err.message}</div>`, root);
+            render(html`<div class="alert alert-error">${getErrorMessage(err)}</div>`, root);
           }
         }
 
-        load();
-        return root;
+        async function loadChart() {
+          try {
+            const res = await fetch('./data/history.json', { cache: 'no-store' });
+            if (!res.ok) {
+              document.getElementById('chart-container').innerHTML = '<div class="text-center text-gray-500 py-12"><p class="text-lg">No historical data yet</p></div>';
+              return;
+            }
+            const history = await res.json();
+            const entries = history.entries || [];
+            
+            if (entries.length === 0) {
+              document.getElementById('chart-container').innerHTML = '<div class="text-center text-gray-500 py-12"><p class="text-lg">Waiting for rate changes...</p></div>';
+              return;
+            }
+
+            // Prepare chart data for USD
+            const timestamps = entries.map(e => {
+              const d = new Date(e.timestamp);
+              return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+            });
+
+            const sampathUSD = entries.map(e => e.rates?.sampath?.USD || null);
+            const hnbUSD = entries.map(e => e.rates?.hnb?.USD || null);
+
+            const canvasId = 'rateChart';
+            document.getElementById('chart-container').innerHTML = `<canvas id="${canvasId}"></canvas>`;
+
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            new Chart(ctx, {
+              type: 'line',
+              data: {
+                labels: timestamps,
+                datasets: [
+                  {
+                    label: 'Sampath USD',
+                    data: sampathUSD,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.3,
+                    fill: true,
+                  },
+                  {
+                    label: 'HNB USD',
+                    data: hnbUSD,
+                    borderColor: '#ef4444',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    tension: 0.3,
+                    fill: true,
+                  },
+                ]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                  legend: { display: true },
+                  title: { display: true, text: 'USD Exchange Rate Trend (Last 7 days)' },
+                },
+                scales: {
+                  y: { beginAtZero: false },
+                },
+              },
+            });
+          } catch (err) {
+            const message = getErrorMessage(err);
+            console.error('Chart error:', err);
+            const chartContainer = document.getElementById('chart-container');
+            if (chartContainer) {
+              chartContainer.innerHTML = '<div class="text-center text-red-500 py-12"><p>' + message + '</p></div>';
+            }
+          }
+        }
       }
 
       const app = App();
