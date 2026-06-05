@@ -60,52 +60,9 @@ jobs:
           name: hnb-rate
           path: output/hnb.json
 
-  notify:
-    name: Send Notifications
-    runs-on: ubuntu-latest
-    needs:
-      - fetch-sampath
-      - fetch-hnb
-    timeout-minutes: 10
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Download Sampath artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: sampath-rate
-          path: output
-
-      - name: Download HNB artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: hnb-rate
-          path: output
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          # no pip cache needed for this small script
-
-      - name: Send notifications
-        env:
-          ALERT_METHOD: ${{ secrets.ALERT_METHOD }}
-          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
-          NTFY_TOPIC_SAMPATH: ${{ secrets.NTFY_TOPIC_SAMPATH }}
-          NTFY_TOPIC_HNB: ${{ secrets.NTFY_TOPIC_HNB }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID:   ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: python notify.py
-
-      - name: Log result summary
-        if: always()
-        run: |
-          echo "### Rate Check Complete" >> $GITHUB_STEP_SUMMARY
-          echo "- **Time (SL):** $(TZ='Asia/Colombo' date)" >> $GITHUB_STEP_SUMMARY
-          echo "- **Alert method:** ${{ secrets.ALERT_METHOD }}" >> $GITHUB_STEP_SUMMARY
+  # Notifications have been removed; notification logic was previously handled by the
+  # `notify` job which ran `notify.py`. That job is intentionally omitted in the
+  # new workflow format to keep Actions focused on fetching and committing data.
 
   commit-data:
     name: Update rates.json and commit

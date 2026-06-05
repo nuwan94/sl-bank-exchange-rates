@@ -7,7 +7,28 @@ from pathlib import Path
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from bank_utils import BankFetcher, HNB_API_URL, parse_hnb_rates
+from bank_utils import BankFetcher
+
+HNB_API_URL = "https://venus.hnb.lk/api/get_exchange_rates_contents_web"
+
+
+def parse_hnb_rates(data):
+    rates = {}
+    if not isinstance(data, list):
+        return rates
+
+    for item in data:
+        if not isinstance(item, dict):
+            continue
+        code = item.get("currencyCode")
+        rate_val = item.get("buyingRate")
+        if not isinstance(code, str) or rate_val is None:
+            continue
+        try:
+            rates[code.strip().upper()] = float(rate_val)
+        except Exception:
+            continue
+    return rates
 
 OUTPUT = Path("output")
 OUTPUT.mkdir(parents=True, exist_ok=True)

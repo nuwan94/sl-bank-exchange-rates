@@ -7,7 +7,70 @@ from pathlib import Path
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from bank_utils import BankFetcher, SAMPATH_API_URL, parse_sampath_rates
+from bank_utils import BankFetcher
+
+SAMPATH_API_URL = "https://www.sampath.lk/api/exchange-rates"
+
+
+def _parse_rate_value(lower: dict):
+    rate_val = (
+        lower.get("ttbuy")
+        or lower.get("ttbuying")
+        or lower.get("tt_buying")
+        or lower.get("buying")
+        or lower.get("buyingrate")
+        or lower.get("ttsel")
+        or lower.get("sellingrate")
+    )
+    if rate_val is None:
+        return None
+    try:
+        return float(str(rate_val).strip())
+    except Exception:
+        return None
+
+
+def extract_rate_item(item: dict):
+    if not isinstance(item, dict):
+        return None
+    lower = {(k or "").lower(): v for k, v in item.items()}
+    code = (
+        lower.get("currency")
+        or lower.get("currencycode")
+        or lower.get("currcode")
+        or lower.get("curr")
+        or ""
+    )
+    if not isinstance(code, str):
+        return None
+    code = code.strip().upper()
+    if not code:
+        return None
+    rate = _parse_rate_value(lower)
+    if rate is None:
+        return None
+    return code, rate
+
+
+def parse_sampath_rates(data):
+    rates = {}
+    if isinstance(data, dict):
+        items = data.get("data") or data.get("rates") or data.get("exchangeRates") or []
+    else:
+        items = data or []
+
+    if not isinstance(items, list):
+        return rates
+
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        parsed = extract_rate_item(item)
+        if parsed is None:
+            continue
+        code, rate = parsed
+        rates[code] = rate
+    return rates
 
 OUTPUT = Path("output")
 OUTPUT.mkdir(parents=True, exist_ok=True)
