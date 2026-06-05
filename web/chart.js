@@ -35,6 +35,13 @@ export function renderUsdChart(entries, containerId = 'chart-container') {
     try { ctx._chartInstance.destroy(); } catch (e) { /* ignore */ }
   }
 
+  const numericValues = datasets.flatMap(dataset => dataset.data.filter(value => typeof value === 'number' && !Number.isNaN(value)));
+  const minValue = numericValues.length ? Math.min(...numericValues) : null;
+  const maxValue = numericValues.length ? Math.max(...numericValues) : null;
+  const axisPadding = 5;
+  const yMin = minValue != null ? Math.max(0, minValue - axisPadding) : undefined;
+  const yMax = maxValue != null ? maxValue + axisPadding : undefined;
+
   const chart = new Chart(ctx, {
     type: 'line',
     data: {
@@ -48,7 +55,13 @@ export function renderUsdChart(entries, containerId = 'chart-container') {
         legend: { display: true },
         title: { display: true, text: 'USD Exchange Rate Trend (Last 7 days)' },
       },
-      scales: { y: { beginAtZero: false } },
+      scales: {
+        y: {
+          beginAtZero: false,
+          min: yMin,
+          max: yMax,
+        },
+      },
     },
   });
 
