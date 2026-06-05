@@ -12,53 +12,23 @@ permissions:
   contents: write
 
 jobs:
-  fetch-sampath:
-    name: Fetch Sampath Rate
+  update-rates:
+    name: Fetch rates and update rates.json
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
+        with:
+          persist-credentials: true
+          fetch-depth: 0
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          # no pip cache needed for this small script
-
-      - name: Fetch Sampath rate
-        run: python fetch_sampath.py
-
-      - name: Upload Sampath artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: sampath-rate
-          path: output/sampath.json
-
-  fetch-hnb:
-    name: Fetch HNB Rate
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          # no pip cache needed for this small script
-
-      - name: Fetch HNB rate
-        run: python fetch_hnb.py
-
-      - name: Upload HNB artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: hnb-rate
-          path: output/hnb.json
+      - name: Fetch Sampath Bank rates
+        run: python update_rates.py
 
   # Notifications have been removed; notification logic was previously handled by the
   # `notify` job which ran `notify.py`. That job is intentionally omitted in the
@@ -68,8 +38,7 @@ jobs:
     name: Update rates.json and commit
     runs-on: ubuntu-latest
     needs:
-      - fetch-sampath
-      - fetch-hnb
+      - update-rates
     timeout-minutes: 5
 
     steps:
