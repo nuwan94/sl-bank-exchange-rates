@@ -6,6 +6,7 @@ from pathlib import Path
 from fetch_sampath import SampathBankFetcher
 from fetch_hnb import HNBBankFetcher
 from fetch_peoples import PeoplesBankFetcher
+from fetch_ndb import NDBBankFetcher
 def main():
     out_dir = Path("web/data")
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -16,21 +17,25 @@ def main():
     sampath_fetcher = SampathBankFetcher()
     hnb_fetcher = HNBBankFetcher()
     peoples_fetcher = PeoplesBankFetcher()
+    ndb_fetcher = NDBBankFetcher()
 
     sampath_rates = sampath_fetcher.fetch_all_rates()
     hnb_rates = hnb_fetcher.fetch_all_rates()
     peoples_rates = peoples_fetcher.fetch_all_rates()
+    ndb_rates = ndb_fetcher.fetch_all_rates()
 
     parsed = {
         "sampath": sampath_rates.get("USD"),
         "hnb": hnb_rates.get("USD"),
         "peoples": peoples_rates.get("USD"),
+        "ndb": ndb_rates.get("USD"),
     }
 
     rates = {
         "sampath": sampath_rates,
         "hnb": hnb_rates,
         "peoples": peoples_rates,
+        "ndb": ndb_rates,
     }
 
     payload = {
