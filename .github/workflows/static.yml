@@ -29,25 +29,12 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: "20"
-          cache: "pnpm"
           check-latest: true
 
       - name: Ensure pnpm available
         run: |
           set -eux
-          if command -v pnpm >/dev/null 2>&1; then
-            echo "pnpm already installed: $(pnpm --version)"
-          else
-            if command -v corepack >/dev/null 2>&1; then
-              corepack enable || true
-              corepack prepare pnpm@latest --activate || true
-            fi
-            if ! command -v pnpm >/dev/null 2>&1; then
-              echo "corepack did not provide pnpm; installing via npm"
-              npm install -g pnpm@latest
-            fi
-            pnpm --version
-          fi
+          npm install -g pnpm
 
       - name: Verify tooling
         run: |
@@ -56,13 +43,7 @@ jobs:
           pnpm --version
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-        working-directory: web
-
-      - name: Verify pnpm in PATH
-        run: |
-          echo "pnpm -> $(command -v pnpm || true)"
-          pnpm -v
+        run: pnpm install
         working-directory: web
 
       - name: Build frontend
