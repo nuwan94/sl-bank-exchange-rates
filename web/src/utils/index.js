@@ -1,28 +1,3 @@
-export const currencyNames = {
-  USD: 'United States Dollar',
-  EUR: 'Euro',
-  GBP: 'British Pound',
-  JPY: 'Japanese Yen',
-  AUD: 'Australian Dollar',
-  CAD: 'Canadian Dollar',
-  SGD: 'Singapore Dollar',
-  HKD: 'Hong Kong Dollar',
-  NZD: 'New Zealand Dollar',
-  CHF: 'Swiss Franc',
-  CNY: 'Chinese Yuan',
-  INR: 'Indian Rupee',
-  MYR: 'Malaysian Ringgit',
-  THB: 'Thai Baht',
-  IDR: 'Indonesian Rupiah',
-  PHP: 'Philippine Peso',
-  VND: 'Vietnamese Dong',
-  KRW: 'South Korean Won',
-  TWD: 'Taiwan Dollar',
-  SEK: 'Swedish Krona',
-  NOK: 'Norwegian Krone',
-  DKK: 'Danish Krone',
-};
-
 export const bankLabels = {
   peoples: 'Peoples Bank',
   sampath: 'Sampath',
@@ -42,22 +17,6 @@ export function sortBankKeys(keys) {
   });
 }
 
-export function hexToRgba(hex, alpha) {
-  if (!hex) return `rgba(0,0,0,${alpha})`;
-  const h = hex.replace('#', '');
-  const full = h.length === 3 ? h.split('').map(c => c + c).join('') : h;
-  const bigint = parseInt(full, 16);
-  const r = (bigint >> 16) & 255;
-  const g = (bigint >> 8) & 255;
-  const b = bigint & 255;
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-}
-
-export function getCurrencyLabel(code) {
-  const name = currencyNames[code] || code;
-  return `${name} (${code})`;
-}
-
 export function formatRate(value) {
   return value == null ? '—' : Number(value).toFixed(2);
 }
@@ -65,6 +24,17 @@ export function formatRate(value) {
 export function getErrorMessage(err) {
   if (err == null) return 'Unknown error';
   return typeof err === 'string' ? err : err.message || String(err);
+}
+
+export function hexToRgba(hex, alpha) {
+  if (!hex) return `rgba(0,0,0,${alpha})`;
+  const cleaned = hex.replace('#', '');
+  const full = cleaned.length === 3 ? cleaned.split('').map(char => char + char).join('') : cleaned;
+  const intValue = parseInt(full, 16);
+  const r = (intValue >> 16) & 255;
+  const g = (intValue >> 8) & 255;
+  const b = intValue & 255;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
 export function setActiveTab(root, activeTab) {

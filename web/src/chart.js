@@ -1,4 +1,5 @@
-import { sortBankKeys, hexToRgba, bankLabels } from './utils.js';
+import Chart from 'chart.js/auto';
+import { sortBankKeys, hexToRgba, bankLabels } from './utils/index.js';
 
 export function renderUsdChart(entries, containerId = 'chart-container') {
   const container = document.getElementById(containerId);
@@ -10,7 +11,6 @@ export function renderUsdChart(entries, containerId = 'chart-container') {
   });
 
   const allBankKeys = sortBankKeys(Array.from(new Set(entries.flatMap(e => Object.keys(e.rates || {})))));
-
   const palette = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316', '#64748b', '#0ea5e9'];
 
   const datasets = allBankKeys.map((bank, idx) => {
@@ -65,6 +65,5 @@ export function renderUsdChart(entries, containerId = 'chart-container') {
     },
   });
 
-  // store instance for later cleanup
   ctx._chartInstance = chart;
 }

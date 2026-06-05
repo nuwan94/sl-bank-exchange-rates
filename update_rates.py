@@ -8,7 +8,7 @@ from fetch_hnb import HNBBankFetcher
 from fetch_peoples import PeoplesBankFetcher
 from fetch_ndb import NDBBankFetcher
 def main():
-    out_dir = Path("web/data")
+    out_dir = Path("web/public/data")
     out_dir.mkdir(parents=True, exist_ok=True)
 
     now = datetime.now(ZoneInfo("Asia/Colombo"))

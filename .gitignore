@@ -7,3 +7,8 @@
 venv/
 env/
 .venv/
+
+
+node_modules/
+dist/
+build/
