@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-06-04T18:19:19.662890+05:30",
+  "fetched_at": "2026-06-05T08:32:18.067021+05:30",
   "sources": {
     "sampath": {
       "success": true,
@@ -8,189 +8,189 @@
         {
           "CurrCode": "USD",
           "CurrName": "U.S. Dollar",
-          "ODBUY": "330.1471",
+          "ODBUY": "330.6377",
           "Order": "1",
           "RateType": "EXRT",
-          "RateWEF": "Thursday, June 04 2026, 11:19:45 AM",
+          "RateWEF": "Friday, June 05 2026, 08:12:19 AM",
           "SplRemarks": "",
-          "TTBUY": "332",
-          "TTSEL": "341"
+          "TTBUY": "332.5",
+          "TTSEL": "341.5"
         },
         {
           "CurrCode": "GBP",
           "CurrName": "U.K. Pound",
-          "ODBUY": "443.0904",
+          "ODBUY": "443.7819",
           "Order": "2",
           "RateType": "EXRT",
-          "RateWEF": "Thursday, June 04 2026, 11:19:45 AM",
+          "RateWEF": "Friday, June 05 2026, 08:12:19 AM",
           "SplRemarks": "",
-          "TTBUY": "444.0803",
-          "TTSEL": "459.5231"
+          "TTBUY": "444.7733",
+          "TTSEL": "460.2402"
         },
         {
           "CurrCode": "EUR",
           "CurrName": "Euro",
-          "ODBUY": "382.1294",
+          "ODBUY": "382.9444",
           "Order": "3",
           "RateType": "EXRT",
-          "RateWEF": "Thursday, June 04 2026, 11:19:45 AM",
+          "RateWEF": "Friday, June 05 2026, 08:12:19 AM",
           "SplRemarks": "",
-          "TTBUY": "382.9981",
-          "TTSEL": "398.2203"
+          "TTBUY": "383.815",
+          "TTSEL": "399.0697"
         },
         {
           "CurrCode": "JPY",
           "CurrName": "Japanese Yen",
-          "ODBUY": "2.0582",
+          "ODBUY": "2.0603",
           "Order": "5",
           "RateType": "EXRT",
-          "RateWEF": "Thursday, June 04 2026, 11:19:45 AM",
+          "RateWEF": "Friday, June 05 2026, 08:12:19 AM",
           "SplRemarks": "",
-          "TTBUY": "2.0632",
-          "TTSEL": "2.1458"
+          "TTBUY": "2.0653",
+          "TTSEL": "2.148"
         },
         {
           "CurrCode": "AUD",
           "CurrName": "Australian Dollar",
-          "ODBUY": "233.2311",
+          "ODBUY": "233.4466",
           "Order": "6",
           "RateType": "EXRT",
-          "RateWEF": "Thursday, June 04 2026, 11:19:45 AM",
+          "RateWEF": "Friday, June 05 2026, 08:12:19 AM",
           "SplRemarks": "",
-          "TTBUY": "234.4908",
-          "TTSEL": "245.2909"
+          "TTBUY": "234.7075",
+          "TTSEL": "245.5175"
         },
         {
           "CurrCode": "NZD",
           "CurrName": "New Zealand Dollar",
-          "ODBUY": "192.7167",
+          "ODBUY": "192.7073",
           "Order": "7",
           "RateType": "EXRT",
-          "RateWEF": "Thursday, June 04 2026, 11:19:45 AM",
+          "RateWEF": "Friday, June 05 2026, 08:12:19 AM",
           "SplRemarks": "",
-          "TTBUY": "193.7007",
-          "TTSEL": "201.4849"
+          "TTBUY": "193.6912",
+          "TTSEL": "201.475"
         },
         {
           "CurrCode": "CHF",
           "CurrName": "Swiss Franc",
-          "ODBUY": "416.1396",
+          "ODBUY": "417.6558",
           "Order": "8",
           "RateType": "EXRT",
-          "RateWEF": "Thursday, June 04 2026, 11:19:45 AM",
+          "RateWEF": "Friday, June 05 2026, 08:12:19 AM",
           "SplRemarks": "",
-          "TTBUY": "417.1378",
-          "TTSEL": "433.8454"
+          "TTBUY": "418.6576",
+          "TTSEL": "435.426"
         },
         {
           "CurrCode": "SEK",
           "CurrName": "Swedish Krona",
-          "ODBUY": "35.0334",
+          "ODBUY": "35.1264",
           "Order": "12",
           "RateType": "EXRT",
-          "RateWEF": "Thursday, June 04 2026, 11:19:45 AM",
+          "RateWEF": "Friday, June 05 2026, 08:12:19 AM",
           "SplRemarks": "",
-          "TTBUY": "35.1204",
-          "TTSEL": "36.5233"
+          "TTBUY": "35.2137",
+          "TTSEL": "36.6203"
         },
         {
           "CurrCode": "DKK",
           "CurrName": "Danish Krone",
-          "ODBUY": "51.1077",
+          "ODBUY": "51.2099",
           "Order": "13",
           "RateType": "EXRT",
-          "RateWEF": "Thursday, June 04 2026, 11:19:45 AM",
+          "RateWEF": "Friday, June 05 2026, 08:12:19 AM",
           "SplRemarks": "",
-          "TTBUY": "51.2459",
-          "TTSEL": "53.2864"
+          "TTBUY": "51.3483",
+          "TTSEL": "53.393"
         },
         {
           "CurrCode": "CAD",
           "CurrName": "Canadian Dollar",
-          "ODBUY": "236.6469",
+          "ODBUY": "237.0923",
           "Order": "14",
           "RateType": "EXRT",
-          "RateWEF": "Thursday, June 04 2026, 11:19:45 AM",
+          "RateWEF": "Friday, June 05 2026, 08:12:19 AM",
           "SplRemarks": "",
-          "TTBUY": "237.2449",
-          "TTSEL": "246.7246"
+          "TTBUY": "237.6914",
+          "TTSEL": "247.189"
         },
         {
           "CurrCode": "SGD",
           "CurrName": "Singapore Dollar",
-          "ODBUY": "256.5583",
+          "ODBUY": "256.5397",
           "Order": "15",
           "RateType": "EXRT",
-          "RateWEF": "Thursday, June 04 2026, 11:19:45 AM",
+          "RateWEF": "Friday, June 05 2026, 08:12:19 AM",
           "SplRemarks": "",
-          "TTBUY": "257.0754",
-          "TTSEL": "267.3742"
+          "TTBUY": "257.0568",
+          "TTSEL": "267.3549"
         },
         {
           "CurrCode": "HKD",
           "CurrName": "Hong Kong Dollar",
-          "ODBUY": "42.4461",
+          "ODBUY": "42.5198",
           "Order": "16",
           "RateType": "EXRT",
-          "RateWEF": "Thursday, June 04 2026, 11:19:45 AM",
+          "RateWEF": "Friday, June 05 2026, 08:12:19 AM",
           "SplRemarks": "",
-          "TTBUY": "42.1089",
-          "TTSEL": "43.7817"
+          "TTBUY": "42.182",
+          "TTSEL": "43.8576"
         },
         {
           "CurrCode": "NOK",
           "CurrName": "Norwegian Krone",
-          "ODBUY": "35.3052",
+          "ODBUY": "35.267",
           "Order": "18",
           "RateType": "EXRT",
-          "RateWEF": "Thursday, June 04 2026, 11:19:45 AM",
+          "RateWEF": "Friday, June 05 2026, 08:12:19 AM",
           "SplRemarks": "",
-          "TTBUY": "35.4019",
-          "TTSEL": "36.8204"
+          "TTBUY": "35.3637",
+          "TTSEL": "36.7805"
         },
         {
           "CurrCode": "CNY",
           "CurrName": "Chinese Yuan",
-          "ODBUY": "48.5315",
+          "ODBUY": "48.614",
           "Order": "40",
           "RateType": "EXRT",
-          "RateWEF": "Thursday, June 04 2026, 11:19:45 AM",
+          "RateWEF": "Friday, June 05 2026, 08:12:19 AM",
           "SplRemarks": "",
-          "TTBUY": "48.6867",
-          "TTSEL": "50.6242"
+          "TTBUY": "48.7694",
+          "TTSEL": "50.7103"
         },
         {
           "CurrCode": "ZAR",
           "CurrName": "South African Rand",
-          "ODBUY": "20.0945",
+          "ODBUY": "20.1541",
           "Order": "41",
           "RateType": "EXRT",
-          "RateWEF": "Thursday, June 04 2026, 11:19:45 AM",
+          "RateWEF": "Friday, June 05 2026, 08:12:19 AM",
           "SplRemarks": "",
-          "TTBUY": "20.1796",
-          "TTSEL": "20.9947"
+          "TTBUY": "20.2394",
+          "TTSEL": "21.0569"
         },
         {
           "CurrCode": "AED",
           "CurrName": "UAE Dirham",
-          "ODBUY": "89.6536",
+          "ODBUY": "89.7917",
           "Order": "43",
           "RateType": "EXRT",
-          "RateWEF": "Thursday, June 04 2026, 11:19:45 AM",
+          "RateWEF": "Friday, June 05 2026, 08:12:19 AM",
           "SplRemarks": "",
-          "TTBUY": "89.8394",
-          "TTSEL": "93.4046"
+          "TTBUY": "89.9777",
+          "TTSEL": "93.5485"
         },
         {
           "CurrCode": "INR",
           "CurrName": "Indian Rupee",
-          "ODBUY": "3.4783",
+          "ODBUY": "3.4777",
           "Order": "55",
           "RateType": "EXRT",
-          "RateWEF": "Thursday, June 04 2026, 11:19:45 AM",
+          "RateWEF": "Friday, June 05 2026, 08:12:19 AM",
           "SplRemarks": "",
-          "TTBUY": "3.4501",
-          "TTSEL": "3.5875"
+          "TTBUY": "3.4494",
+          "TTSEL": "3.5868"
         }
       ]
     },
@@ -300,28 +300,28 @@
     ]
   },
   "parsed": {
-    "sampath": 332.0,
+    "sampath": 332.5,
     "hnb": 330.5
   },
   "rates": {
     "sampath": {
-      "USD": 332.0,
-      "GBP": 444.0803,
-      "EUR": 382.9981,
-      "JPY": 2.0632,
-      "AUD": 234.4908,
-      "NZD": 193.7007,
-      "CHF": 417.1378,
-      "SEK": 35.1204,
-      "DKK": 51.2459,
-      "CAD": 237.2449,
-      "SGD": 257.0754,
-      "HKD": 42.1089,
-      "NOK": 35.4019,
-      "CNY": 48.6867,
-      "ZAR": 20.1796,
-      "AED": 89.8394,
-      "INR": 3.4501
+      "USD": 332.5,
+      "GBP": 444.7733,
+      "EUR": 383.815,
+      "JPY": 2.0653,
+      "AUD": 234.7075,
+      "NZD": 193.6912,
+      "CHF": 418.6576,
+      "SEK": 35.2137,
+      "DKK": 51.3483,
+      "CAD": 237.6914,
+      "SGD": 257.0568,
+      "HKD": 42.182,
+      "NOK": 35.3637,
+      "CNY": 48.7694,
+      "ZAR": 20.2394,
+      "AED": 89.9777,
+      "INR": 3.4494
     },
     "hnb": {
       "AUD": 234.6875,
