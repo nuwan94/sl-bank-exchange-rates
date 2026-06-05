@@ -1,32 +1,41 @@
-import { useState, useEffect, useMemo } from 'react';
-import RateTable from './components/RateTable.jsx';
-import ChartSection from './components/ChartSection.jsx';
-import PageHeader from './components/PageHeader.jsx';
-import TabNav from './components/TabNav.jsx';
-import { bankLabels, sortBankKeys, formatRate, getErrorMessage } from './utils/index.js';
-import { renderUsdChart } from './chart.js';
+import { useState, useEffect, useMemo } from "react";
+import RateTable from "./components/RateTable.jsx";
+import ChartSection from "./components/ChartSection.jsx";
+import Footer from "./components/Footer.jsx";
+import TabNav from "./components/TabNav.jsx";
+import {
+  bankLabels,
+  sortBankKeys,
+  formatRate,
+  getErrorMessage,
+} from "./utils/index.js";
+import { renderUsdChart } from "./chart.js";
 
-const TAB_RATES = 'rates';
-const TAB_CHARTS = 'charts';
+const TAB_RATES = "rates";
+const TAB_CHARTS = "charts";
 
 export default function App() {
   const [rates, setRates] = useState({});
-  const [fetchedAt, setFetchedAt] = useState('unknown');
+  const [fetchedAt, setFetchedAt] = useState("unknown");
   const [historyEntries, setHistoryEntries] = useState([]);
   const [activeTab, setActiveTab] = useState(TAB_RATES);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadData() {
       try {
-        const ratesResponse = await fetch('/data/rates.json', { cache: 'no-store' });
+        const ratesResponse = await fetch("/data/rates.json", {
+          cache: "no-store",
+        });
         if (!ratesResponse.ok) throw new Error(await ratesResponse.text());
         const ratesData = await ratesResponse.json();
         setRates(ratesData.rates || {});
-        setFetchedAt(ratesData.fetched_at || 'unknown');
+        setFetchedAt(ratesData.fetched_at || "unknown");
 
-        const historyResponse = await fetch('/data/history.json', { cache: 'no-store' });
+        const historyResponse = await fetch("/data/history.json", {
+          cache: "no-store",
+        });
         if (historyResponse.ok) {
           const historyData = await historyResponse.json();
           setHistoryEntries(historyData.entries || []);
@@ -43,20 +52,23 @@ export default function App() {
 
   useEffect(() => {
     if (activeTab === TAB_CHARTS && historyEntries.length > 0) {
-      renderUsdChart(historyEntries, 'chart-container');
+      renderUsdChart(historyEntries, "chart-container");
     }
   }, [activeTab, historyEntries]);
 
   const bankKeys = useMemo(() => sortBankKeys(Object.keys(rates)), [rates]);
   const currencies = useMemo(
-    () => Array.from(new Set(bankKeys.flatMap(bank => Object.keys(rates[bank] || {})))).sort(),
-    [bankKeys, rates]
+    () =>
+      Array.from(
+        new Set(bankKeys.flatMap((bank) => Object.keys(rates[bank] || {}))),
+      ).sort(),
+    [bankKeys, rates],
   );
   const currencyOrder = useMemo(() => {
-    const priorityCurrencies = ['USD', 'EUR'];
+    const priorityCurrencies = ["USD", "EUR"];
     return [
-      ...priorityCurrencies.filter(code => currencies.includes(code)),
-      ...currencies.filter(code => !priorityCurrencies.includes(code)),
+      ...priorityCurrencies.filter((code) => currencies.includes(code)),
+      ...currencies.filter((code) => !priorityCurrencies.includes(code)),
     ];
   }, [currencies]);
 
@@ -68,7 +80,7 @@ export default function App() {
     <div className="space-y-5">
       <TabNav activeTab={activeTab} onTabChange={setActiveTab} />
 
-      <div className={activeTab !== TAB_RATES ? 'hidden' : ''}>
+      <div className={activeTab !== TAB_RATES ? "hidden" : ""}>
         <RateTable
           rates={rates}
           bankKeys={bankKeys}
@@ -79,12 +91,11 @@ export default function App() {
         />
       </div>
 
-      <div className={activeTab !== TAB_CHARTS ? 'hidden' : ''}>
+      <div className={activeTab !== TAB_CHARTS ? "hidden" : ""}>
         <ChartSection loading={loading} entries={historyEntries} />
       </div>
 
-            <PageHeader fetchedAt={fetchedAt} />
-
+      <Footer fetchedAt={fetchedAt} />
     </div>
   );
 }

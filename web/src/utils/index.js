@@ -1,5 +1,5 @@
 export const bankLabels = {
-  peoples: 'Peoples Bank',
+  peoples: 'Peoples',
   sampath: 'Sampath',
   hnb: 'HNB',
   ndb: 'NDB',
