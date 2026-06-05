@@ -1,6 +1,6 @@
 import { h, render } from 'https://unpkg.com/preact@10.11.0?module';
 import htm from 'https://unpkg.com/htm@3.1.1?module';
-import { bankLabels, sortBankKeys, getCurrencyLabel, formatRate, getErrorMessage, setActiveTab } from './utils.js';
+import { bankLabels, sortBankKeys, formatRate, getErrorMessage, setActiveTab } from './utils.js';
 import { renderUsdChart } from './chart.js';
 
 const html = htm.bind(h);
@@ -30,23 +30,23 @@ function App() {
       ];
 
       render(html`
-        <div>
-          <div class="mb-4 text-sm text-gray-600">
-            <strong>Last Updated:</strong> ${new Date(fetched).toLocaleString()}
+        <div class="space-y-5">
+          <div class="rounded-3xl border border-slate-200 bg-slate-50 px-4 py-4 sm:px-5 sm:py-5 shadow-sm">
+            <p class="text-sm text-slate-600">Last updated <span class="font-semibold text-slate-900">${new Date(fetched).toLocaleString()}</span></p>
           </div>
 
-          <div class="tabs tabs-boxed mb-4">
-            <button type="button" class="tab tab-active" data-tab="rates">Rates</button>
-            <button type="button" class="tab" data-tab="charts">Charts</button>
+          <div class="tabs tabs-boxed rounded-3xl bg-slate-50 border border-slate-200 p-1 shadow-sm">
+            <button type="button" class="tab tab-active rounded-3xl" data-tab="rates">Rates</button>
+            <button type="button" class="tab rounded-3xl" data-tab="charts">Charts</button>
           </div>
 
           <div id="tab-rates" class="tab-panel">
-            <div class="overflow-x-auto">
-              <table class="table table-zebra w-full">
+            <div class="overflow-x-auto rounded-3xl border border-slate-200 bg-white shadow-sm">
+              <table class="table-auto border-collapse w-full text-xs sm:text-sm">
                 <thead>
-                  <tr class="bg-gray-100">
-                    <th class="text-left">Currency</th>
-                    ${bankKeys.map(bank => html`<th class="text-right">${bankLabels[bank] || bank}</th>`)}
+                  <tr class="bg-slate-100 text-slate-700">
+                    <th class="text-left px-3 py-3 border-r border-slate-200 font-semibold uppercase tracking-[0.08em]">Currency</th>
+                    ${bankKeys.map(bank => html`<th class="text-right px-3 py-3 border-slate-200 font-semibold uppercase tracking-[0.08em]">${bankLabels[bank] || bank}</th>`)}
                   </tr>
                 </thead>
                 <tbody>
@@ -56,10 +56,10 @@ function App() {
                       ? Math.max(...values.filter(v => v != null))
                       : null;
                     return html`
-                      <tr>
-                        <td class="font-semibold">${getCurrencyLabel(code)}</td>
+                      <tr class="border-b border-slate-200 last:border-b-0 hover:bg-slate-50">
+                        <td class="font-semibold px-3 py-3 border-r border-slate-200">${code}</td>
                         ${values.map(value => html`
-                          <td class="text-right ${value != null && maxValue != null && value === maxValue ? 'bg-yellow-100 font-bold text-yellow-900' : ''}">${formatRate(value)}</td>
+                          <td class="text-right px-3 py-3 ${value != null && maxValue != null && value === maxValue ? 'bg-green-50 font-semibold text-slate-900' : 'text-slate-700'} border-slate-200">${formatRate(value)}</td>
                         `)}
                       </tr>
                     `;
@@ -69,10 +69,12 @@ function App() {
             </div>
           </div>
 
-          <div id="tab-charts" class="tab-panel hidden p-6">
-            <div id="chart-container" class="w-full">
-              <div class="text-center text-gray-500 py-12">
-                <p class="text-lg">📊 Loading chart data...</p>
+          <div id="tab-charts" class="tab-panel hidden">
+            <div class="rounded-3xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
+              <div id="chart-container" class="min-h-[320px] w-full">
+                <div class="text-center text-slate-500 py-12">
+                  <p class="text-lg">📊 Loading chart data...</p>
+                </div>
               </div>
             </div>
           </div>

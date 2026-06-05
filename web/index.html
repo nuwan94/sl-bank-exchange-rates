@@ -7,13 +7,21 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@latest/dist/full.min.css" rel="stylesheet" type="text/css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+      html, body { margin: 0; padding: 0; min-height: 100%; }
+      body { background: linear-gradient(180deg, #f8fbff 0%, #e8f1fb 100%); }
+      .table-border-smooth th, .table-border-smooth td { border-color: #d6ddea; }
+    </style>
   </head>
-  <body>
-    <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
-      <div class="max-w-4xl mx-auto">
-        <div class="card bg-white shadow-lg">
-          <div class="card-body">
-            <h1 class="card-title text-3xl mb-6">Bank Exchange Rates</h1>
+  <body class="min-h-screen bg-slate-100 text-slate-900">
+    <div class="min-h-screen flex items-start justify-center px-3 py-4 sm:px-6 sm:py-8">
+      <div class="w-full max-w-6xl">
+        <div class="overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-[0_30px_80px_rgba(15,23,42,0.08)]">
+          <div class="bg-slate-50 px-5 py-6 sm:px-8 sm:py-8">
+            <h1 class="text-3xl sm:text-4xl font-semibold tracking-tight text-slate-900">Bank Exchange Rates</h1>
+            <p class="mt-2 max-w-3xl text-sm leading-6 text-slate-600">Live exchange rate summaries across your tracked banks, optimized for comfortable reading on mobile and desktop.</p>
+          </div>
+          <div class="px-4 pb-6 sm:px-6 sm:pb-8">
             <div id="app">Loading…</div>
           </div>
         </div>
