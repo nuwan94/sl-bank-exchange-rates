@@ -13,32 +13,8 @@ permissions:
 
 jobs:
   update-rates:
-    name: Fetch rates and update rates.json
+    name: Update rates and history
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: true
-          fetch-depth: 0
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Fetch Sampath Bank rates
-        run: python update_rates.py
-
-  # Notifications have been removed; notification logic was previously handled by the
-  # `notify` job which ran `notify.py`. That job is intentionally omitted in the
-  # new workflow format to keep Actions focused on fetching and committing data.
-
-  commit-data:
-    name: Update rates.json and commit
-    runs-on: ubuntu-latest
-    needs:
-      - update-rates
     timeout-minutes: 5
 
     steps:
@@ -60,10 +36,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          if git status --porcelain | grep -q web/data/rates.json; then
-            git add .
-            git commit -m "Update rates [skip ci]"
-            git push origin HEAD
-          else
-            echo "No changes to rates"
-          fi
+          git add .
+          git commit -m "Update rates [skip ci]"
+          git push origin HEAD
