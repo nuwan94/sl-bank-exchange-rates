@@ -1,4 +1,4 @@
-name: Sampath Bank USD Rate Monitor
+name: Bank Currency Rate Monitor
 
 on:
   # ── Run every 30 minutes ─────────────────────────────────────────────────
@@ -127,10 +127,10 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Run update script to build data/rates.json
+      - name: Run update script to build rates
         run: python update_rates.py
 
-      - name: Commit and push data/rates.json
+      - name: Commit and push rates
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"

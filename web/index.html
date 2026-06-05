@@ -122,20 +122,19 @@
                           <th class="text-left">Currency</th>
                           <th class="text-right">Sampath</th>
                           <th class="text-right">HNB</th>
-                          <th class="text-right">Difference</th>
                         </tr>
                       </thead>
                       <tbody>
                         ${currencies.map(code => {
                           const sp = sampathRates[code];
                           const hnb = hnbRates[code];
-                          const diff = (sp != null && hnb != null) ? (sp - hnb).toFixed(2) : '—';
+                          const spHigher = (sp != null && hnb != null && sp > hnb);
+                          const hnbHigher = (sp != null && hnb != null && hnb > sp);
                           return html`
                             <tr>
                               <td class="font-semibold">${getCurrencyLabel(code)}</td>
-                              <td class="text-right">${formatRate(sp)}</td>
-                              <td class="text-right">${formatRate(hnb)}</td>
-                              <td class="text-right text-sm ${diff !== '—' && parseFloat(diff) > 0 ? 'text-green-600 font-semibold' : diff !== '—' && parseFloat(diff) < 0 ? 'text-red-600 font-semibold' : ''}">${diff}</td>
+                              <td class="text-right ${spHigher ? 'bg-yellow-100 font-bold text-yellow-900' : ''}">${formatRate(sp)}</td>
+                              <td class="text-right ${hnbHigher ? 'bg-yellow-100 font-bold text-yellow-900' : ''}">${formatRate(hnb)}</td>
                             </tr>
                           `;
                         })}
@@ -240,6 +239,9 @@
             }
           }
         }
+
+        load();
+        return root;
       }
 
       const app = App();
