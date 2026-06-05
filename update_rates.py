@@ -1,97 +1,11 @@
 import json
-import urllib.request
-import urllib.error
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from pathlib import Path
 
-from bank_utils import fetch_sampath_rate, fetch_hnb_rate
-
-SAMPATH_API_URL = "https://www.sampath.lk/api/exchange-rates"
-HNB_API_URL = "https://venus.hnb.lk/api/get_exchange_rates_contents_web"
-
-
-def fetch_raw(url: str, headers: dict | None = None):
-    headers = headers or {"User-Agent": "python-urllib/3"}
-    req = urllib.request.Request(url, headers=headers)
-    try:
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-            return data
-    except urllib.error.HTTPError as e:
-        print(f"HTTP error fetching {url}: {e.code} {e.reason}")
-    except urllib.error.URLError as e:
-        print(f"Network error fetching {url}: {e.reason}")
-    except Exception as e:
-        print(f"Unexpected error fetching {url}: {e}")
-    return None
-
-
-def parse_sampath_rates(data):
-    rates = {}
-    if isinstance(data, dict):
-        items = data.get("data") or data.get("rates") or data.get("exchangeRates") or []
-    else:
-        items = data or []
-
-    if not isinstance(items, list):
-        return rates
-
-    for item in items:
-        if not isinstance(item, dict):
-            continue
-
-        lower = { (k or "").lower(): v for k, v in item.items() }
-        code = (
-            lower.get("currency")
-            or lower.get("currencycode")
-            or lower.get("currcode")
-            or lower.get("curr")
-            or ""
-        )
-        if not isinstance(code, str):
-            continue
-        code = code.strip().upper()
-        if not code:
-            continue
-
-        rate_val = (
-            lower.get("ttbuy")
-            or lower.get("ttbuying")
-            or lower.get("tt_buying")
-            or lower.get("buying")
-            or lower.get("buyingrate")
-            or lower.get("ttsel")
-            or lower.get("sellingrate")
-        )
-        if rate_val is None:
-            continue
-        try:
-            rates[code] = float(str(rate_val).strip())
-        except Exception:
-            continue
-    return rates
-
-
-def parse_hnb_rates(data):
-    rates = {}
-    if not isinstance(data, list):
-        return rates
-
-    for item in data:
-        if not isinstance(item, dict):
-            continue
-        code = item.get("currencyCode")
-        rate_val = item.get("buyingRate")
-        if not isinstance(code, str) or rate_val is None:
-            continue
-        try:
-            rates[code.strip().upper()] = float(rate_val)
-        except Exception:
-            continue
-    return rates
-
-
+from fetch_sampath import SampathBankFetcher
+from fetch_hnb import HNBBankFetcher
+from fetch_peoples import PeoplesBankFetcher
 def main():
     out_dir = Path("web/data")
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -99,39 +13,32 @@ def main():
     now = datetime.now(ZoneInfo("Asia/Colombo"))
     fetched_at = now.isoformat()
 
-    sampath_raw = fetch_raw(SAMPATH_API_URL, headers={
-        "User-Agent": "Mozilla/5.0",
-        "Referer": "https://www.sampath.lk/",
-        "Accept": "application/json",
-    })
-    hnb_raw = fetch_raw(HNB_API_URL, headers={
-        "User-Agent": "Mozilla/5.0",
-        "Accept": "application/json",
-    })
+    sampath_fetcher = SampathBankFetcher()
+    hnb_fetcher = HNBBankFetcher()
+    peoples_fetcher = PeoplesBankFetcher()
 
-    parsed = {}
-    try:
-        parsed["sampath"] = fetch_sampath_rate()
-    except Exception as e:
-        parsed["sampath"] = None
-        print(f"Could not parse Sampath USD rate: {e}")
+    sampath_rates = sampath_fetcher.fetch_all_rates()
+    hnb_rates = hnb_fetcher.fetch_all_rates()
+    peoples_rates = peoples_fetcher.fetch_all_rates()
 
-    try:
-        parsed["hnb"] = fetch_hnb_rate()
-    except Exception as e:
-        parsed["hnb"] = None
-        print(f"Could not parse HNB USD rate: {e}")
+    parsed = {
+        "sampath": sampath_rates.get("USD"),
+        "hnb": hnb_rates.get("USD"),
+        "peoples": peoples_rates.get("USD"),
+    }
 
     rates = {
-        "sampath": parse_sampath_rates(sampath_raw),
-        "hnb": parse_hnb_rates(hnb_raw),
+        "sampath": sampath_rates,
+        "hnb": hnb_rates,
+        "peoples": peoples_rates,
     }
 
     payload = {
         "fetched_at": fetched_at,
         "sources": {
-            "sampath": sampath_raw,
-            "hnb": hnb_raw,
+            "sampath": sampath_fetcher.fetch_json(),
+            "hnb": hnb_fetcher.fetch_json(),
+            "peoples": peoples_fetcher.fetch_text(),
         },
         "parsed": parsed,
         "rates": rates,
@@ -157,11 +64,17 @@ def main():
         changed = True
     else:
         latest = history["latest"]
-        # Check if any rate changed
-        for bank in ["sampath", "hnb"]:
-            if rates.get(bank) != latest.get(bank):
+        # Check if any bank or currency rate changed
+        for bank, bank_rates in rates.items():
+            if bank_rates != latest.get(bank):
                 changed = True
                 break
+        if not changed:
+            # Also detect banks removed from the latest record
+            for bank in latest.keys():
+                if bank not in rates:
+                    changed = True
+                    break
 
     if changed:
         if "entries" not in history:

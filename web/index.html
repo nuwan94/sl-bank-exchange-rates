@@ -86,21 +86,31 @@
 
             const fetched = data.fetched_at || 'unknown';
             const rates = data.rates || {};
-            const sampathRates = rates.sampath || {};
-            const hnbRates = rates.hnb || {};
 
-            let currencies = Array.from(
-              new Set([
-                ...Object.keys(sampathRates),
-                ...Object.keys(hnbRates),
-              ])
+            const bankLabels = {
+              peoples: 'Peoples Bank',
+              sampath: 'Sampath',
+              hnb: 'HNB',
+            };
+
+            const bankKeys = Object.keys(rates).sort((a, b) => {
+              const priority = ['peoples', 'sampath', 'hnb'];
+              const ia = priority.indexOf(a);
+              const ib = priority.indexOf(b);
+              if (ia !== -1 && ib !== -1) return ia - ib;
+              if (ia !== -1) return -1;
+              if (ib !== -1) return 1;
+              return a.localeCompare(b);
+            });
+
+            const currencies = Array.from(
+              new Set(bankKeys.flatMap(bank => Object.keys(rates[bank] || {})))
             ).sort();
 
-            // Move USD and EUR to top
-            const priority = ['USD', 'EUR'];
-            currencies = [
-              ...priority.filter(c => currencies.includes(c)),
-              ...currencies.filter(c => !priority.includes(c))
+            const priorityCurrencies = ['USD', 'EUR'];
+            const currencyOrder = [
+              ...priorityCurrencies.filter(c => currencies.includes(c)),
+              ...currencies.filter(c => !priorityCurrencies.includes(c)),
             ];
 
             render(html`
@@ -120,21 +130,21 @@
                       <thead>
                         <tr class="bg-gray-100">
                           <th class="text-left">Currency</th>
-                          <th class="text-right">Sampath</th>
-                          <th class="text-right">HNB</th>
+                          ${bankKeys.map(bank => html`<th class="text-right">${bankLabels[bank] || bank}</th>`)}
                         </tr>
                       </thead>
                       <tbody>
-                        ${currencies.map(code => {
-                          const sp = sampathRates[code];
-                          const hnb = hnbRates[code];
-                          const spHigher = (sp != null && hnb != null && sp > hnb);
-                          const hnbHigher = (sp != null && hnb != null && hnb > sp);
+                        ${currencyOrder.map(code => {
+                          const values = bankKeys.map(bank => rates[bank]?.[code] ?? null);
+                          const maxValue = values.filter(v => v != null).length
+                            ? Math.max(...values.filter(v => v != null))
+                            : null;
                           return html`
                             <tr>
                               <td class="font-semibold">${getCurrencyLabel(code)}</td>
-                              <td class="text-right ${spHigher ? 'bg-yellow-100 font-bold text-yellow-900' : ''}">${formatRate(sp)}</td>
-                              <td class="text-right ${hnbHigher ? 'bg-yellow-100 font-bold text-yellow-900' : ''}">${formatRate(hnb)}</td>
+                              ${values.map(value => html`
+                                <td class="text-right ${value != null && maxValue != null && value === maxValue ? 'bg-yellow-100 font-bold text-yellow-900' : ''}">${formatRate(value)}</td>
+                              `)}
                             </tr>
                           `;
                         })}

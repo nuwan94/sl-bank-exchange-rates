@@ -1,41 +1,41 @@
 #!/usr/bin/env python3
 """
-HNB Bank rate fetcher.
+Peoples Bank rate fetcher.
 """
 
 from pathlib import Path
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from bank_utils import BankFetcher, HNB_API_URL, parse_hnb_rates
+from bank_utils import BankFetcher, PEOPLES_URL, parse_peoples_rates
 
 OUTPUT = Path("output")
 OUTPUT.mkdir(parents=True, exist_ok=True)
 
 
-class HNBBankFetcher(BankFetcher):
+class PeoplesBankFetcher(BankFetcher):
     def __init__(self):
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-            "Accept": "application/json",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         }
-        super().__init__("HNB", HNB_API_URL, headers=headers)
+        super().__init__("Peoples Bank", PEOPLES_URL, headers=headers)
 
     def fetch_all_rates(self) -> dict[str, float]:
-        return parse_hnb_rates(self.fetch_json())
+        return parse_peoples_rates(self.fetch_text())
 
 
 def main():
-    fetcher = HNBBankFetcher()
+    fetcher = PeoplesBankFetcher()
     rate = fetcher.fetch_rate()
     payload = {
-        "bank": "HNB",
+        "bank": "PEOPLES",
         "rate": rate,
         "fetched_at": datetime.now(ZoneInfo("Asia/Colombo")).isoformat(),
     }
-    path = OUTPUT / "hnb.json"
+    path = OUTPUT / "peoples.json"
     path.write_text(__import__('json').dumps(payload), encoding="utf-8")
-    print(f"✅ HNB rate saved to {path}")
+    print(f"✅ Peoples Bank rate saved to {path}")
 
 
 if __name__ == "__main__":

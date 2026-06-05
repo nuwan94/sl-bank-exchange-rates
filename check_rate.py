@@ -11,6 +11,8 @@ import urllib.parse
 import urllib.error
 from datetime import datetime
 from zoneinfo import ZoneInfo
+from fetch_sampath import SampathBankFetcher
+from fetch_hnb import HNBBankFetcher
 
 # ── Configuration (set these as GitHub Secrets) ─────────────────────────────
 ALERT_METHOD      = os.environ.get("ALERT_METHOD", "ntfy")             # "ntfy" or "telegram"
@@ -25,101 +27,7 @@ NTFY_TOPIC_HNB     = os.environ.get("NTFY_TOPIC_HNB", "")
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID   = os.environ.get("TELEGRAM_CHAT_ID", "")
 
-# Bank API endpoints
-SAMPATH_API_URL   = "https://www.sampath.lk/api/exchange-rates"
-HNB_API_URL       = "https://venus.hnb.lk/api/get_exchange_rates_contents_web"
-
-# ── Fetch Rate ───────────────────────────────────────────────────────────────
-
-def _extract_rate_from_item(item: dict):
-    if not isinstance(item, dict):
-        return None
-    lower = { (k or "").lower(): v for k, v in item.items() }
-    code = (
-        lower.get("currency")
-        or lower.get("currencycode")
-        or lower.get("currcode")
-        or lower.get("curr")
-        or ""
-    )
-    if isinstance(code, str) and code.upper() == "USD":
-        rate_val = (
-            lower.get("ttbuy")
-            or lower.get("ttbuying")
-            or lower.get("tt_buying")
-            or lower.get("buying")
-            or lower.get("buyingrate")
-            or lower.get("ttsel")
-            or lower.get("sellingrate")
-        )
-        if rate_val is None:
-            return None
-        try:
-            return float(str(rate_val).strip())
-        except Exception:
-            return None
-    return None
-
-
-def fetch_sampath_rate():
-    """Fetch USD TT Buying rate from Sampath Bank API."""
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-        "Referer":    "https://www.sampath.lk/",
-        "Accept":     "application/json",
-    }
-
-    req = urllib.request.Request(SAMPATH_API_URL, headers=headers)
-    try:
-        with urllib.request.urlopen(req, timeout=15) as response:
-            data = json.loads(response.read().decode("utf-8"))
-    except urllib.error.HTTPError as e:
-        raise RuntimeError(f"HTTP error fetching Sampath rate: {e.code} {e.reason}")
-    except urllib.error.URLError as e:
-        raise RuntimeError(f"Network error fetching Sampath rate: {e.reason}")
-
-    if isinstance(data, dict):
-        rates = data.get("data") or data.get("rates") or data.get("exchangeRates") or []
-    else:
-        rates = data
-
-    if isinstance(rates, list):
-        for item in rates:
-            r = _extract_rate_from_item(item)
-            if r is not None:
-                return r
-
-    print("⚠️  Could not parse rate from Sampath API response:")
-    print(json.dumps(data, indent=2)[:2000])
-    raise RuntimeError("USD TT Buying rate not found in Sampath API response.")
-
-
-def fetch_hnb_rate():
-    """Fetch USD buying rate from HNB API."""
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-        "Accept":     "application/json",
-    }
-
-    req = urllib.request.Request(HNB_API_URL, headers=headers)
-    try:
-        with urllib.request.urlopen(req, timeout=15) as response:
-            data = json.loads(response.read().decode("utf-8"))
-    except urllib.error.HTTPError as e:
-        raise RuntimeError(f"HTTP error fetching HNB rate: {e.code} {e.reason}")
-    except urllib.error.URLError as e:
-        raise RuntimeError(f"Network error fetching HNB rate: {e.reason}")
-
-    if isinstance(data, list):
-        for item in data:
-            if isinstance(item, dict) and item.get("currencyCode") == "USD":
-                rate = item.get("buyingRate")
-                if rate is not None:
-                    return float(rate)
-
-    print("⚠️  Could not parse rate from HNB API response:")
-    print(json.dumps(data, indent=2)[:2000])
-    raise RuntimeError("USD buying rate not found in HNB API response.")
+## ── Fetch Rate ───────────────────────────────────────────────────────────────
 
 
 def get_ntfy_topic_for_bank(bank: str) -> tuple[str | None, bool]:
@@ -136,9 +44,9 @@ def get_ntfy_topic_for_bank(bank: str) -> tuple[str | None, bool]:
 def fetch_rate_for_bank(bank: str) -> float:
     bank = bank.strip().upper()
     if bank == "SAMPATH":
-        return fetch_sampath_rate()
+        return SampathBankFetcher().fetch_rate()
     if bank == "HNB":
-        return fetch_hnb_rate()
+        return HNBBankFetcher().fetch_rate()
     raise RuntimeError(f"Unsupported bank: {bank}")
 
 
