@@ -1,44 +1,71 @@
 <!doctype html>
 <html lang="en" data-theme="light">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Bank Exchange Rates</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@latest/dist/full.min.css" rel="stylesheet" type="text/css" />
-    <style>
-      html, body { margin: 0; padding: 0; min-height: 100%; }
-      body { background: linear-gradient(180deg, #f8fbff 0%, #e8f1fb 100%); }
-      .table-border-smooth th, .table-border-smooth td { border-color: #d6ddea; }
-    </style>
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="manifest" href="/site.webmanifest">
-    <link rel="icon" href="/favicon.ico">
-    <meta name="title" content="Sri Lankan Bank Exchange Rates">
-    <meta name="description" content="Current exchange rates across all banks in Sri Lanka. Updated every 30 minutes. Find the best rates today.">
-    <meta name="keywords" content="Sri Lanka, exchange rates, banks, currency, USD, LKR, best rates, financial data, currency converter, forex, money exchange, financial news, economic data">
-    <meta name="author" content="Nuwan Alawatta">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  </head>
-  <body class="min-h-screen bg-slate-100 text-slate-900">
-    <div class="min-h-screen flex items-start justify-center px-3 py-4 sm:px-6 sm:py-8">
-      <div class="w-full max-w-6xl">
-        <div class="overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-[0_30px_80px_rgba(15,23,42,0.08)]">
-          <div class="bg-slate-50 px-5 py-6 sm:px-8 sm:py-8">
-            <h1 class="text-3xl text-center sm:text-4xl font-semibold tracking-tight text-slate-900">
-              <img src="/apple-touch-icon.png" alt="icon" class="inline-block mr-2 h-full w-12 animate-pulse" />
-              Sri Lankan Bank Exchange Rates
-            </h1>
-          </div>
-          <div class="px-4 pb-6 sm:px-6 sm:pb-8">
-            <div id="app">Loading…</div>
-          </div>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Bank Exchange Rates</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@latest/dist/full.min.css" rel="stylesheet" type="text/css" />
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+    }
+
+    body {
+      background: linear-gradient(180deg, #f8fbff 0%, #e8f1fb 100%);
+    }
+
+    .table-border-smooth th,
+    .table-border-smooth td {
+      border-color: #d6ddea;
+    }
+  </style>
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="icon" href="/favicon.ico">
+  <meta name="title" content="Sri Lankan Bank Exchange Rates">
+  <meta name="description"
+    content="Current exchange rates across all banks in Sri Lanka. Updated every 30 minutes. Find the best rates today.">
+  <meta name="keywords"
+    content="Sri Lanka, exchange rates, banks, currency, USD, LKR, best rates, financial data, currency converter, forex, money exchange, financial news, economic data">
+  <meta name="author" content="Nuwan Alawatta">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-966TZ337FM"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-966TZ337FM');
+  </script>
+</head>
+
+<body class="min-h-screen bg-slate-100 text-slate-900">
+  <div class="min-h-screen flex items-start justify-center px-3 py-4 sm:px-6 sm:py-8">
+    <div class="w-full max-w-6xl">
+      <div
+        class="overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-[0_30px_80px_rgba(15,23,42,0.08)]">
+        <div class="bg-slate-50 px-5 py-6 sm:px-8 sm:py-8">
+          <h1 class="text-3xl text-center sm:text-4xl font-semibold tracking-tight text-slate-900">
+            <img src="/apple-touch-icon.png" alt="icon" class="inline-block mr-2 h-full w-12 animate-pulse" />
+            Sri Lankan Bank Exchange Rates
+          </h1>
+        </div>
+        <div class="px-4 pb-6 sm:px-6 sm:pb-8">
+          <div id="app">Loading…</div>
         </div>
       </div>
     </div>
+  </div>
 
-    <script type="module" src="./src/main.jsx"></script>
-  </body>
+  <script type="module" src="./src/main.jsx"></script>
+</body>
+
 </html>
