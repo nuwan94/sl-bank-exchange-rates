@@ -1,100 +1,108 @@
 import json
-from datetime import datetime
-from zoneinfo import ZoneInfo
+from datetime import datetime, timedelta
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
-from fetch_sampath import SampathBankFetcher
 from fetch_hnb import HNBBankFetcher
-from fetch_peoples import PeoplesBankFetcher
 from fetch_ndb import NDBBankFetcher
+from fetch_peoples import PeoplesBankFetcher
+from fetch_sampath import SampathBankFetcher
 
-def main():
-    out_dir = Path("web/public/data")
-    out_dir.mkdir(parents=True, exist_ok=True)
 
-    now = datetime.now(ZoneInfo("Asia/Colombo"))
-    fetched_at = now.isoformat()
+TZ = ZoneInfo("Asia/Colombo")
+OUT_DIR = Path("web/public/data")
+RATES_PATH = OUT_DIR / "rates.json"
+HISTORY_PATH = OUT_DIR / "history.json"
+ENTRY_RETENTION_DAYS = 7
 
-    sampath_fetcher = SampathBankFetcher()
-    hnb_fetcher = HNBBankFetcher()
-    peoples_fetcher = PeoplesBankFetcher()
-    ndb_fetcher = NDBBankFetcher()
 
-    all_banks = [
-        sampath_fetcher,
-        hnb_fetcher,
-        peoples_fetcher,
-        ndb_fetcher,
+def fetch_all_rates():
+    fetchers = [
+        SampathBankFetcher(),
+        HNBBankFetcher(),
+        PeoplesBankFetcher(),
+        NDBBankFetcher(),
     ]
 
     rates = {}
-
-    for bank in all_banks:
+    for fetcher in fetchers:
         try:
-            bank_rates = bank.fetch_all_rates()
-            rates[bank.name] = bank_rates
+            rates[fetcher.name] = fetcher.fetch_all_rates()
         except Exception as e:
-            print(f"⚠️  Could not fetch {bank.name} rates: {e}")
+            print(f"⚠️  Could not fetch {fetcher.name} rates: {e}")
+
+    return rates
 
 
-    payload = {
-        "fetched_at": fetched_at,
-        "rates": rates,
-    }
+def load_history():
+    if not HISTORY_PATH.exists():
+        return {}
 
-    path = out_dir / "rates.json"
-    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"✅ Written {path}")
+    try:
+        return json.loads(HISTORY_PATH.read_text(encoding="utf-8"))
+    except Exception as e:
+        print(f"⚠️  Could not read history: {e}")
+        return {}
 
-    # Track historical changes
-    history_path = out_dir / "history.json"
-    history = {}
-    if history_path.exists():
-        try:
-            history = json.loads(history_path.read_text(encoding="utf-8"))
-        except Exception as e:
-            print(f"⚠️  Could not read history: {e}")
 
-    # Check if rates changed and log new entry
-    changed = False
-    if "latest" not in history:
-        history["latest"] = rates
-        changed = True
-    else:
-        latest = history["latest"]
-        # Check if any bank or currency rate changed
-        for bank, bank_rates in rates.items():
-            if bank_rates != latest.get(bank):
-                changed = True
-                break
-        if not changed:
-            # Also detect banks removed from the latest record
-            for bank in latest.keys():
-                if bank not in rates:
-                    changed = True
-                    break
+def rates_changed(new_rates, history):
+    latest = history.get("latest")
+    if latest is None:
+        return True
 
-    if changed:
-        if "entries" not in history:
-            history["entries"] = []
-        
-        history["entries"].append({
-            "timestamp": fetched_at,
-            "rates": rates,
-        })
-        
-        # Keep only last 7 days of entries
-        cutoff_time = datetime.fromisoformat(fetched_at).timestamp() - (7 * 24 * 3600)
-        history["entries"] = [
-            e for e in history["entries"]
-            if datetime.fromisoformat(e["timestamp"]).timestamp() > cutoff_time
-        ]
-        
-        history["latest"] = rates
-        history_path.write_text(json.dumps(history, ensure_ascii=False, indent=2), encoding="utf-8")
-        print(f"✅ Logged rate change to {history_path}")
-    else:
+    # Any bank missing or changed?
+    for bank, bank_rates in new_rates.items():
+        if bank_rates != latest.get(bank):
+            return True
+
+    # Detect banks removed from the latest record
+    for bank in latest.keys():
+        if bank not in new_rates:
+            return True
+
+    return False
+
+
+def prune_entries(entries, cutoff_dt):
+    return [
+        e
+        for e in entries
+        if datetime.fromisoformat(e["timestamp"]) > cutoff_dt
+    ]
+
+
+def log_history_if_changed(rates, fetched_at):
+    history = load_history()
+
+    changed = rates_changed(rates, history)
+    if not changed:
         print("ℹ️  No rate changes detected")
+        return
+
+    if "entries" not in history:
+        history["entries"] = []
+
+    history["entries"].append({"timestamp": fetched_at, "rates": rates})
+
+    cutoff_dt = datetime.fromisoformat(fetched_at) - timedelta(days=ENTRY_RETENTION_DAYS)
+    history["entries"] = prune_entries(history["entries"], cutoff_dt)
+
+    history["latest"] = rates
+    HISTORY_PATH.write_text(json.dumps(history, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"✅ Logged rate change to {HISTORY_PATH}")
+
+
+def main():
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    fetched_at = datetime.now(TZ).isoformat()
+
+    rates = fetch_all_rates()
+
+    payload = {"fetched_at": fetched_at, "rates": rates}
+    RATES_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"✅ Written {RATES_PATH}")
+
+    log_history_if_changed(rates, fetched_at)
 
 
 if __name__ == "__main__":
