@@ -6,6 +6,9 @@ on:
     workflows: ["Bank Currency Rate Monitor"]
     types:
       - completed
+  push:
+    branches:
+      - main
 
 permissions:
   contents: read
@@ -28,9 +31,6 @@ jobs:
 
       - name: Setup Node
         uses: actions/setup-node@v5
-        with:
-          node-version: "20"
-          check-latest: true
 
       - name: Ensure pnpm available
         run: |
@@ -50,8 +50,6 @@ jobs:
       - name: Build frontend
         run: pnpm run build
         working-directory: web
-
-      # Runtime data is now placed into `web/public/data` so Vite will include it in the build.
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

@@ -3,7 +3,7 @@ name: Bank Currency Rate Monitor
 on:
   # ── Run every 30 minutes ─────────────────────────────────────────────────
   schedule:
-    - cron: "0,30 * * * *"   # every 30 min — change to "*/15 * * * *" for every 15 min
+    - cron: "*/30 * * * *"   # every 30 min — change to "*/15 * * * *" for every 15 min
 
   # ── Also allow manual trigger from GitHub Actions UI ────────────────────
   workflow_dispatch:

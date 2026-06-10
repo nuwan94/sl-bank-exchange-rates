@@ -115,7 +115,7 @@ class PeoplesBankFetcher(BankFetcher):
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         }
-        super().__init__("Peoples Bank", PEOPLES_URL, headers=headers)
+        super().__init__("peoples_bank", PEOPLES_URL, headers=headers)
 
     def fetch_all_rates(self) -> dict[str, float]:
         return parse_peoples_rates(self.fetch_text())

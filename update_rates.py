@@ -20,74 +20,25 @@ def main():
     peoples_fetcher = PeoplesBankFetcher()
     ndb_fetcher = NDBBankFetcher()
 
-    # Fetch rates per bank with error isolation so one failing fetch doesn't stop the whole run
-    try:
-        sampath_rates = sampath_fetcher.fetch_all_rates()
-    except Exception as e:
-        print(f"⚠️  Could not fetch Sampath rates: {e}")
-        sampath_rates = {}
+    all_banks = [
+        sampath_fetcher,
+        hnb_fetcher,
+        peoples_fetcher,
+        ndb_fetcher,
+    ]
 
-    try:
-        hnb_rates = hnb_fetcher.fetch_all_rates()
-    except Exception as e:
-        print(f"⚠️  Could not fetch HNB rates: {e}")
-        hnb_rates = {}
+    rates = {}
 
-    try:
-        peoples_rates = peoples_fetcher.fetch_all_rates()
-    except Exception as e:
-        print(f"⚠️  Could not fetch Peoples rates: {e}")
-        peoples_rates = {}
+    for bank in all_banks:
+        try:
+            bank_rates = bank.fetch_all_rates()
+            rates[bank.name] = bank_rates
+        except Exception as e:
+            print(f"⚠️  Could not fetch {bank.name} rates: {e}")
 
-    try:
-        ndb_rates = ndb_fetcher.fetch_all_rates()
-    except Exception as e:
-        print(f"⚠️  Could not fetch NDB rates: {e}")
-        ndb_rates = {}
-
-    parsed = {
-        "sampath": sampath_rates.get("USD"),
-        "hnb": hnb_rates.get("USD"),
-        "peoples": peoples_rates.get("USD"),
-        "ndb": ndb_rates.get("USD"),
-    }
-
-    rates = {
-        "sampath": sampath_rates,
-        "hnb": hnb_rates,
-        "peoples": peoples_rates,
-        "ndb": ndb_rates,
-    }
-
-    # (History will include all banks)
-
-    # Build sources safely (some fetchers provide JSON, others HTML)
-    sources = {}
-    try:
-        sources["sampath"] = sampath_fetcher.fetch_json()
-    except Exception as e:
-        sources["sampath"] = None
-        print(f"⚠️  Could not fetch Sampath source: {e}")
-    try:
-        sources["hnb"] = hnb_fetcher.fetch_json()
-    except Exception as e:
-        sources["hnb"] = None
-        print(f"⚠️  Could not fetch HNB source: {e}")
-    try:
-        sources["peoples"] = peoples_fetcher.fetch_text()
-    except Exception as e:
-        sources["peoples"] = None
-        print(f"⚠️  Could not fetch Peoples source: {e}")
-    try:
-        sources["ndb"] = ndb_fetcher.fetch_text()
-    except Exception as e:
-        sources["ndb"] = None
-        print(f"⚠️  Could not fetch NDB source: {e}")
 
     payload = {
         "fetched_at": fetched_at,
-        "sources": sources,
-        "parsed": parsed,
         "rates": rates,
     }
 

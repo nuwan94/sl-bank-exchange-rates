@@ -89,7 +89,7 @@ class NDBBankFetcher(BankFetcher):
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         }
-        super().__init__("NDB", url, headers=headers)
+        super().__init__("national_development_bank", url, headers=headers)
 
     def fetch_all_rates(self) -> dict[str, float]:
         return parse_ndb_rates(self.fetch_text())

@@ -83,7 +83,7 @@ class SampathBankFetcher(BankFetcher):
             "Referer": "https://www.sampath.lk/",
             "Accept": "application/json",
         }
-        super().__init__("Sampath", SAMPATH_API_URL, headers=headers)
+        super().__init__("sampath_bank", SAMPATH_API_URL, headers=headers)
 
     def fetch_all_rates(self) -> dict[str, float]:
         return parse_sampath_rates(self.fetch_json())

@@ -40,7 +40,7 @@ class HNBBankFetcher(BankFetcher):
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
             "Accept": "application/json",
         }
-        super().__init__("HNB", HNB_API_URL, headers=headers)
+        super().__init__("hatton_national_bank", HNB_API_URL, headers=headers)
 
     def fetch_all_rates(self) -> dict[str, float]:
         return parse_hnb_rates(self.fetch_json())
