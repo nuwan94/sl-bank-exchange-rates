@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { getCurrencyName } from "../utils/index.js";
 
 export default function RateTable({
   rates,
@@ -71,6 +72,7 @@ export default function RateTable({
               >
                 <td className="font-semibold px-3 py-3 border-r border-slate-200">
                   {code}
+                  <div className="text-xs text-slate-500">{getCurrencyName(code)}</div>
                 </td>
                 {values.map((value, index) => (
                   <td

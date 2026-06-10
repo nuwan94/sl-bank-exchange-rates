@@ -68,6 +68,8 @@ def parse_ndb_rates(html: str) -> dict[str, float]:
         if len(row) < 7:
             continue
         code = row[1].strip()
+        if (code == 'CNH'):
+            code = 'CNY'  # Convert CNH to CNY
         if not code:
             continue
         tt_buy = row[6].strip() if len(row) > 6 else ""
