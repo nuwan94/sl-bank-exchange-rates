@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getCurrencyName } from "../utils/index.js";
 
 export default function RateTable({
@@ -11,9 +11,20 @@ export default function RateTable({
 }) {
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [currencies, setCurrencies] = useState([]);
+
+  useEffect(() => {
+      if (currencyOrder.length > 0) {
+        const currencyWithNames = currencyOrder.map((code) => ({
+          code,
+          name: getCurrencyName(code),
+        }));
+        setCurrencies(currencyWithNames);
+      }
+  }, [currencyOrder]);
 
   const handleSearch = (e) => {
-    setSearchQuery(e.target.value.toUpperCase());
+    setSearchQuery(e.target.value.toLowerCase());
   };
 
   if (loading) {
@@ -59,20 +70,20 @@ export default function RateTable({
           </tr>
         </thead>
         <tbody>
-          {currencyOrder.map((code) => {
-            const values = bankKeys.map((bank) => rates[bank]?.[code] ?? null);
+          {currencies.map((currency) => {
+            const values = bankKeys.map((bank) => rates[bank]?.[currency.code] ?? null);
             const maxValue = values.filter((v) => v != null).length
               ? Math.max(...values.filter((v) => v != null))
               : null;
             return (
               <tr
-                key={code}
+                key={currency.code}
                 className="border-b border-slate-200 last:border-b-0 hover:bg-slate-50"
-                style={{ display: code.includes(searchQuery) ? '' : 'none' }}
+                style={{ display: currency.code.toLowerCase().includes(searchQuery) || currency.name.toLowerCase().includes(searchQuery) ? '' : 'none' }}
               >
                 <td className="font-semibold px-3 py-3 border-r border-slate-200">
-                  {code}
-                  <div className="text-xs text-slate-500">{getCurrencyName(code)}</div>
+                  {currency.code}
+                  <div className="text-xs text-slate-500">{currency.name}</div>
                 </td>
                 {values.map((value, index) => (
                   <td

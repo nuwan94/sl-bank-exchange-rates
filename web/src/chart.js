@@ -7,13 +7,14 @@ export function renderUsdChart(entries, containerId = "chart-container") {
 
   const timestamps = entries.map((e) => {
     const d = new Date(e.timestamp);
-    return d.toLocaleString("en-US", {
+    const dateString = d.toLocaleString("en-US", {
       month: "short",
       day: "numeric",
       weekday: "short",
       hour: "2-digit",
       minute: "2-digit",
-    });
+    }).split(", ");
+    return [dateString[0] + " " + dateString[1], dateString[2]];
   });
 
   const allBankKeys = sortBankKeys(
@@ -88,6 +89,12 @@ export function renderUsdChart(entries, containerId = "chart-container") {
           beginAtZero: false,
           min: yMin,
           max: yMax,
+        },
+        x: {
+          ticks: {
+            autoSkip: true, // Automatically skip labels if they overlap
+            maxTicksLimit: 15, // Strictly limits the maximum number of labels shown
+          },
         },
       },
     },
