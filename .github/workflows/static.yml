@@ -45,7 +45,6 @@ jobs:
           node --version
           which pnpm || true
           pnpm --version
-          pnpm approve-builds
 
       - name: Install dependencies
         run: pnpm install
