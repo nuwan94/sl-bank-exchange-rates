@@ -1,2 +1,6 @@
+packages:
+  - chart.js
+  - react
+  - react-dom
 allowBuilds:
   esbuild: true

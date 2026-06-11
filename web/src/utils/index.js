@@ -54,32 +54,6 @@ export function setActiveTab(root, activeTab) {
   });
 }
 
-/*
-* USD
-JPY
-GBP
-EUR
-AUD
-THB
-SGD
-SEK
-SAR
-QAR
-OMR
-NZD
-NOK
-MYR
-KWD
-JOD
-INR
-HKD
-DKK
-CNY
-CHF
-CAD
-BHD
-AED
-*/
 export function getCurrencyName(code) {
   const currencyNames = {
     USD: "US Dollar",
