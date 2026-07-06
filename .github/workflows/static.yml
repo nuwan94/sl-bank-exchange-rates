@@ -54,14 +54,55 @@ jobs:
         run: pnpm run build
         working-directory: web
 
+      - name: Show build output (diagnostics)
+        run: |
+          echo "Node: $(node --version)"
+          echo "pnpm: $(pnpm --version)"
+          echo "ls web (top-level):"
+          ls -la web || true
+          echo "ls web/dist:"
+          ls -la web/dist || true
+          echo "ls web/build:"
+          ls -la web/build || true
+          echo "Disk usage for web:"
+          du -sh web || true
+
+      - name: Detect pages artifact
+        id: detect
+        run: |
+          if [ -d web/dist ] && [ "$(ls -A web/dist || true)" ]; then
+            echo "Detected: web/dist"
+            echo "path=web/dist" >> $GITHUB_OUTPUT
+          elif [ -d web/build ] && [ "$(ls -A web/build || true)" ]; then
+            echo "Detected: web/build"
+            echo "path=web/build" >> $GITHUB_OUTPUT
+          else
+            echo "No build output found in web/dist or web/build" >&2
+            ls -la web || true
+            exit 1
+          fi
+
+      - name: Show artifact contents before upload
+        run: |
+          echo "Uploading contents of ${{ steps.detect.outputs.path }}:"
+          find "${{ steps.detect.outputs.path }}" -maxdepth 3 -type f -print | sed -n '1,200p'
+          du -sh "${{ steps.detect.outputs.path }}" || true
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'web/dist'
+          path: ${{ steps.detect.outputs.path }}
 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
+
+      - name: Show deployment outputs
+        if: ${{ always() }}
+        run: |
+          echo "deployment outputs:"
+          echo "page_url: ${{ steps.deployment.outputs.page_url || 'N/A' }}"
+          echo "deployment_id: ${{ steps.deployment.outputs.deployment_id || 'N/A' }}"
