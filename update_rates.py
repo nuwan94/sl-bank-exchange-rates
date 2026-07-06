@@ -9,6 +9,7 @@ from fetch_hnb import HNBBankFetcher
 from fetch_ndb import NDBBankFetcher
 from fetch_peoples import PeoplesBankFetcher
 from fetch_sampath import SampathBankFetcher
+from fetch_seylan import SeylanBankFetcher
 
 
 TZ = ZoneInfo("Asia/Colombo")
@@ -26,6 +27,7 @@ def fetch_all_rates():
         NDBBankFetcher(),
         BOCBankFetcher(),
         ComBankBankFetcher(),
+        SeylanBankFetcher(),
     ]
 
     rates = {}
