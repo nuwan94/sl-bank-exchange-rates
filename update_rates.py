@@ -4,6 +4,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from fetch_boc import BOCBankFetcher
+from fetch_combank import ComBankBankFetcher
 from fetch_hnb import HNBBankFetcher
 from fetch_ndb import NDBBankFetcher
 from fetch_peoples import PeoplesBankFetcher
@@ -24,6 +25,7 @@ def fetch_all_rates():
         PeoplesBankFetcher(),
         NDBBankFetcher(),
         BOCBankFetcher(),
+        ComBankBankFetcher(),
     ]
 
     rates = {}

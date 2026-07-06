@@ -4,6 +4,7 @@ export const bankLabels = {
   hnb: "HNB",
   ndb: "NDB",
   boc: "BOC",
+  combank: "ComBank",
 };
 
 export const bankSourceUrls = {
@@ -12,6 +13,7 @@ export const bankSourceUrls = {
   hnb: "https://www.hnb.lk/exchange-rates",
   ndb: "https://www.ndbbank.com/rates/exchange-rates",
   boc: "https://www.boc.lk/rates-tariff",
+  combank: "https://www.combank.lk/rates-tariff#exchange-rates",
 };
 
 export function sortBankKeys(keys) {
