@@ -3,6 +3,7 @@ export const bankLabels = {
   sampath: "Sampath",
   hnb: "HNB",
   ndb: "NDB",
+  boc: "BOC",
 };
 
 export const bankSourceUrls = {
@@ -10,6 +11,7 @@ export const bankSourceUrls = {
   sampath: "https://www.sampath.lk/rates-and-charges?activeTab=exchange-rates",
   hnb: "https://www.hnb.lk/exchange-rates",
   ndb: "https://www.ndbbank.com/rates/exchange-rates",
+  boc: "https://www.boc.lk/rates-tariff",
 };
 
 export function sortBankKeys(keys) {
@@ -88,6 +90,7 @@ export function getCurrencyName(code) {
     MYR: "Malaysian Ringgit",
     NOK: "Norwegian Krone",
     ZAR: "South African Rand",
+    KRW: "South Korean Won",
   };
   return currencyNames[code] || "";
 }

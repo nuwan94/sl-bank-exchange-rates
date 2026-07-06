@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+from fetch_boc import BOCBankFetcher
 from fetch_hnb import HNBBankFetcher
 from fetch_ndb import NDBBankFetcher
 from fetch_peoples import PeoplesBankFetcher
@@ -22,6 +23,7 @@ def fetch_all_rates():
         HNBBankFetcher(),
         PeoplesBankFetcher(),
         NDBBankFetcher(),
+        BOCBankFetcher(),
     ]
 
     rates = {}
