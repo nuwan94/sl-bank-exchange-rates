@@ -5,6 +5,13 @@ export const bankLabels = {
   ndb: "NDB",
 };
 
+export const bankSourceUrls = {
+  peoples: "https://www.peoplesbank.lk/exchange-rates/",
+  sampath: "https://www.sampath.lk/rates-and-charges?activeTab=exchange-rates",
+  hnb: "https://www.hnb.lk/exchange-rates",
+  ndb: "https://www.ndbbank.com/rates/exchange-rates",
+};
+
 export function sortBankKeys(keys) {
   const priority = ["peoples", "sampath", "hnb"];
   return keys.sort((a, b) => {

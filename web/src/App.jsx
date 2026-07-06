@@ -5,6 +5,7 @@ import Footer from "./components/Footer.jsx";
 import TabNav from "./components/TabNav.jsx";
 import {
   bankLabels,
+  bankSourceUrls,
   sortBankKeys,
   formatRate,
   getErrorMessage,
@@ -86,6 +87,7 @@ export default function App() {
           bankKeys={bankKeys}
           currencyOrder={currencyOrder}
           bankLabels={bankLabels}
+          bankSourceUrls={bankSourceUrls}
           formatRate={formatRate}
           loading={loading}
         />

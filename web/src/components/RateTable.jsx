@@ -6,6 +6,7 @@ export default function RateTable({
   bankKeys,
   currencyOrder,
   bankLabels,
+  bankSourceUrls,
   formatRate,
   loading,
 }) {
@@ -64,7 +65,33 @@ export default function RateTable({
                 key={bank}
                 className="text-right px-3 py-3 border-slate-200 font-semibold uppercase tracking-[0.08em]"
               >
-                {bankLabels[bank] || bank}
+                <div className="flex items-center justify-end gap-1">
+                  <span>{bankLabels[bank] || bank}</span>
+                  {bankSourceUrls?.[bank] ? (
+                    <a
+                      href={bankSourceUrls[bank]}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex text-slate-500 transition hover:text-slate-900"
+                      aria-label={`Open ${bankLabels[bank] || bank} exchange rate page`}
+                      title={`Open ${bankLabels[bank] || bank} exchange rate page`}
+                    >
+                      <svg
+                        className="h-3.5 w-3.5"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M7 17L17 7" />
+                        <path d="M7 7h10v10" />
+                      </svg>
+                    </a>
+                  ) : null}
+                </div>
               </th>
             ))}
           </tr>
