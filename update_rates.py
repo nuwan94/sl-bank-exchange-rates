@@ -101,17 +101,23 @@ def prune_entries(entries, cutoff_dt):
 
 def log_history_if_changed(rates, fetched_at):
     history = load_history()
-    latest = history.get("latest")
-
-    compacted_rates = compact_rates(rates, latest or {}) if latest is not None else rates
-    changed = bool(compacted_rates)
-
-    if not changed:
-        print("ℹ️  No rate changes detected")
-        return
-
     if "entries" not in history:
         history["entries"] = []
+
+    previous_rates = None
+    if history["entries"]:
+        previous_rates = history["entries"][-1].get("rates", {})
+    else:
+        previous_rates = history.get("latest")
+
+    compacted_rates = compact_rates(rates, previous_rates or {}) if previous_rates is not None else rates
+    if not history["entries"]:
+        compacted_rates = rates
+
+    changed = bool(compacted_rates)
+    if not changed and history["entries"]:
+        print("ℹ️  No rate changes detected")
+        return
 
     history["entries"].append({"timestamp": fetched_at, "rates": compacted_rates})
 
