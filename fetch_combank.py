@@ -53,36 +53,38 @@ def _normalize_currency_code(name: str) -> str | None:
 
 def parse_combank_rates(html: str) -> dict[str, float]:
     rates = {}
-    table_match = re.search(r'<table[^>]*class="with-border"[^>]*>(.*?)</table>', html, re.S | re.I)
-    if not table_match:
+    tables = re.findall(r'<table[^>]*>(.*?)</table>', html, re.S | re.I)
+    if not tables:
         return rates
 
-    table_html = table_match.group(1)
-    for row_html in re.findall(r'<tr[^>]*>(.*?)</tr>', table_html, re.S | re.I):
-        cells = [
-            re.sub(r'<[^>]+>', ' ', cell).strip()
-            for cell in re.findall(r'<t[dh][^>]*>(.*?)</t[dh]>', row_html, re.S | re.I)
-        ]
-        if len(cells) < 7:
-            continue
+    for table_html in tables:
+        for row_html in re.findall(r'<tr[^>]*>(.*?)</tr>', table_html, re.S | re.I):
+            cells = [
+                re.sub(r'<[^>]+>', ' ', cell).strip()
+                for cell in re.findall(r'<t[dh][^>]*>(.*?)</t[dh]>', row_html, re.S | re.I)
+            ]
+            if len(cells) < 4:
+                continue
 
-        first_cell = cells[0].strip()
-        if not first_cell:
-            continue
-        if any(char.isdigit() for char in first_cell):
-            continue
+            first_cell = cells[0].strip()
+            if not first_cell:
+                continue
+            if any(char.isdigit() for char in first_cell):
+                continue
+            if "currency" in first_cell.lower() or "rate" in first_cell.lower():
+                continue
 
-        code = _normalize_currency_code(first_cell)
-        if not code:
-            continue
+            code = _normalize_currency_code(first_cell)
+            if not code:
+                continue
 
-        buy_cell = cells[-2].strip() if len(cells) > 1 else ""
-        if buy_cell in {"-", ""}:
-            buy_cell = cells[1].strip()
-        try:
-            rates[code] = float(buy_cell.replace(",", ""))
-        except Exception:
-            continue
+            buy_cell = cells[-2].strip() if len(cells) > 1 else ""
+            if buy_cell in {"-", ""}:
+                buy_cell = cells[1].strip()
+            try:
+                rates[code] = float(buy_cell.replace(",", ""))
+            except Exception:
+                continue
     return rates
 
 

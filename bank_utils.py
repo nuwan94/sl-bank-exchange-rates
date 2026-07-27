@@ -2,29 +2,55 @@ import json
 import urllib.request
 import urllib.error
 
-DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+DEFAULT_HEADERS = {
+    "User-Agent": DEFAULT_USER_AGENT,
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9",
+}
 
 
 class BankFetcher:
     def __init__(self, name: str, url: str, headers: dict | None = None):
         self.name = name
         self.url = url
-        self.headers = headers or {"User-Agent": DEFAULT_USER_AGENT}
+        self.headers = {**DEFAULT_HEADERS, **(headers or {})}
         self._cached_text: str | None = None
         self._cached_json: object | None = None
 
     def fetch_text(self) -> str:
         if self._cached_text is None:
-            req = urllib.request.Request(self.url, headers=self.headers)
-            try:
-                with urllib.request.urlopen(req, timeout=15) as response:
-                    self._cached_text = response.read().decode("utf-8", errors="ignore")
-            except urllib.error.HTTPError as e:
-                raise RuntimeError(f"HTTP error fetching {self.name}: {e.code} {e.reason}")
-            except urllib.error.URLError as e:
-                raise RuntimeError(f"Network error fetching {self.name}: {e.reason}")
-            except Exception as e:
-                raise RuntimeError(f"Unexpected error fetching {self.name}: {e}")
+            urls_to_try = [self.url]
+            if "#" in self.url:
+                urls_to_try.append(self.url.split("#", 1)[0])
+
+            last_error: Exception | None = None
+            for attempt, url in enumerate(urls_to_try):
+                req = urllib.request.Request(url, headers=self.headers)
+                try:
+                    with urllib.request.urlopen(req, timeout=20) as response:
+                        self._cached_text = response.read().decode("utf-8", errors="ignore")
+                        return self._cached_text
+                except urllib.error.HTTPError as e:
+                    last_error = RuntimeError(f"HTTP error fetching {self.name}: {e.code} {e.reason}")
+                    if e.code in {403, 429, 500, 502, 503, 504} and attempt < len(urls_to_try) - 1:
+                        continue
+                    raise last_error
+                except urllib.error.URLError as e:
+                    last_error = RuntimeError(f"Network error fetching {self.name}: {e.reason}")
+                    if attempt < len(urls_to_try) - 1:
+                        continue
+                    raise last_error
+                except Exception as e:
+                    last_error = RuntimeError(f"Unexpected error fetching {self.name}: {e}")
+                    if attempt < len(urls_to_try) - 1:
+                        continue
+                    raise last_error
+
+            if last_error is not None:
+                raise last_error
+
+            raise RuntimeError(f"Unable to fetch {self.name}")
         return self._cached_text
 
     def fetch_json(self):
