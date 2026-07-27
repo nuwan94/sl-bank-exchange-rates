@@ -34,7 +34,21 @@ export function renderUsdChart(entries, containerId = "chart-container") {
   ];
 
   const datasets = allBankKeys.map((bank, idx) => {
-    const data = entries.map((e) => e.rates?.[bank]?.USD ?? null);
+    let lastValue = null;
+    const data = entries.map((e) => {
+      const value = e.rates?.[bank]?.USD ?? null;
+      if (value == null) {
+        return null;
+      }
+
+      if (lastValue == null || value !== lastValue) {
+        lastValue = value;
+        return value;
+      }
+
+      return null;
+    });
+
     const color = palette[idx % palette.length];
     return {
       label: `${bankLabels[bank] || bank} USD`,
@@ -43,6 +57,7 @@ export function renderUsdChart(entries, containerId = "chart-container") {
       backgroundColor: hexToRgba(color, 0.08),
       tension: 0.3,
       fill: true,
+      spanGaps: true,
     };
   });
 
@@ -82,7 +97,7 @@ export function renderUsdChart(entries, containerId = "chart-container") {
       maintainAspectRatio: true,
       plugins: {
         legend: { display: true },
-        title: { display: true, text: "USD Exchange Rate Trend (Last 7 days)" },
+        title: { display: true, text: "USD Exchange Rate Trend (Last 30 days)" },
       },
       scales: {
         y: {

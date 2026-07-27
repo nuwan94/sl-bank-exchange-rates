@@ -16,7 +16,7 @@ TZ = ZoneInfo("Asia/Colombo")
 OUT_DIR = Path("web/public/data")
 RATES_PATH = OUT_DIR / "rates.json"
 HISTORY_PATH = OUT_DIR / "history.json"
-ENTRY_RETENTION_DAYS = 7
+ENTRY_RETENTION_DAYS = 30
 
 
 def fetch_all_rates():
@@ -51,15 +51,37 @@ def load_history():
         return {}
 
 
+def compact_rates(rates, previous_rates):
+    if not previous_rates:
+        return rates
+
+    compacted = {}
+    for bank, bank_rates in rates.items():
+        previous_bank_rates = previous_rates.get(bank)
+        if not isinstance(previous_bank_rates, dict):
+            compacted[bank] = bank_rates
+            continue
+
+        changed_rates = {}
+        for currency, value in bank_rates.items():
+            previous_value = previous_bank_rates.get(currency)
+            if previous_value != value:
+                changed_rates[currency] = value
+
+        if changed_rates:
+            compacted[bank] = changed_rates
+
+    return compacted
+
+
 def rates_changed(new_rates, history):
     latest = history.get("latest")
     if latest is None:
         return True
 
-    # Any bank missing or changed?
-    for bank, bank_rates in new_rates.items():
-        if bank_rates != latest.get(bank):
-            return True
+    compacted_rates = compact_rates(new_rates, latest)
+    if compacted_rates != {}:
+        return True
 
     # Detect banks removed from the latest record
     for bank in latest.keys():
@@ -79,8 +101,11 @@ def prune_entries(entries, cutoff_dt):
 
 def log_history_if_changed(rates, fetched_at):
     history = load_history()
+    latest = history.get("latest")
 
-    changed = rates_changed(rates, history)
+    compacted_rates = compact_rates(rates, latest or {}) if latest is not None else rates
+    changed = bool(compacted_rates)
+
     if not changed:
         print("ℹ️  No rate changes detected")
         return
@@ -88,7 +113,7 @@ def log_history_if_changed(rates, fetched_at):
     if "entries" not in history:
         history["entries"] = []
 
-    history["entries"].append({"timestamp": fetched_at, "rates": rates})
+    history["entries"].append({"timestamp": fetched_at, "rates": compacted_rates})
 
     cutoff_dt = datetime.fromisoformat(fetched_at) - timedelta(days=ENTRY_RETENTION_DAYS)
     history["entries"] = prune_entries(history["entries"], cutoff_dt)
