@@ -65,4 +65,9 @@ class BankFetcher:
         rates = self.fetch_all_rates()
         if "USD" in rates and rates["USD"] is not None:
             return rates["USD"]
-        raise RuntimeError(f"USD rate not found for {self.name}")
+        text_len = len(self._cached_text) if self._cached_text is not None else 0
+        preview = (self._cached_text or "")[:300].replace("\n", " ")
+        raise RuntimeError(
+            f"USD rate not found for {self.name} "
+            f"(parsed {len(rates)} rates, fetched {text_len} chars, preview: {preview!r})"
+        )

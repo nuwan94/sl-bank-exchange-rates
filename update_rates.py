@@ -16,6 +16,7 @@ TZ = ZoneInfo("Asia/Colombo")
 OUT_DIR = Path("web/public/data")
 RATES_PATH = OUT_DIR / "rates.json"
 HISTORY_PATH = OUT_DIR / "history.json"
+DEBUG_ERRORS_PATH = OUT_DIR / "debug_errors.json"
 ENTRY_RETENTION_DAYS = 30
 
 
@@ -31,13 +32,15 @@ def fetch_all_rates():
     ]
 
     rates = {}
+    errors = {}
     for fetcher in fetchers:
         try:
             rates[fetcher.name] = fetcher.fetch_all_rates()
         except Exception as e:
             print(f"⚠️  Could not fetch {fetcher.name} rates: {e}")
+            errors[fetcher.name] = str(e)
 
-    return rates
+    return rates, errors
 
 
 def load_history():
@@ -129,16 +132,27 @@ def log_history_if_changed(rates, fetched_at):
     print(f"✅ Logged rate change to {HISTORY_PATH}")
 
 
+def write_debug_errors(errors, fetched_at):
+    if not errors:
+        if DEBUG_ERRORS_PATH.exists():
+            DEBUG_ERRORS_PATH.unlink()
+        return
+    payload = {"fetched_at": fetched_at, "errors": errors}
+    DEBUG_ERRORS_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"⚠️  Wrote fetch errors to {DEBUG_ERRORS_PATH}")
+
+
 def main():
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     fetched_at = datetime.now(TZ).isoformat()
 
-    rates = fetch_all_rates()
+    rates, errors = fetch_all_rates()
 
     payload = {"fetched_at": fetched_at, "rates": rates}
     RATES_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"✅ Written {RATES_PATH}")
 
+    write_debug_errors(errors, fetched_at)
     log_history_if_changed(rates, fetched_at)
 
 
