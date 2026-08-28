@@ -94,7 +94,8 @@ class ComBankBankFetcher(BankFetcher):
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         }
-        super().__init__("combank", COMBANK_URL, headers=headers)
+        # combank.lk's WAF returns 403 for plain HTTP clients; a real browser passes.
+        super().__init__("combank", COMBANK_URL, headers=headers, use_browser=True)
 
     def fetch_all_rates(self) -> dict[str, float]:
         return parse_combank_rates(self.fetch_text())
