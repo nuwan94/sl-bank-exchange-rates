@@ -35,7 +35,19 @@ def fetch_all_rates():
     errors = {}
     for fetcher in fetchers:
         try:
-            rates[fetcher.name] = fetcher.fetch_all_rates()
+            bank_rates = fetcher.fetch_all_rates()
+            if not bank_rates:
+                # fetch_text() succeeded (no HTTP/browser exception) but the
+                # page didn't contain the expected table — e.g. a WAF
+                # challenge/interstitial rendered instead of the real page.
+                # Treat this as a failure rather than silently publishing an
+                # empty bank entry that looks "present" with no data.
+                text = getattr(fetcher, "_cached_text", None) or ""
+                preview = text[:300].replace("\n", " ")
+                raise RuntimeError(
+                    f"No rates parsed (fetched {len(text)} chars, preview: {preview!r})"
+                )
+            rates[fetcher.name] = bank_rates
         except Exception as e:
             print(f"⚠️  Could not fetch {fetcher.name} rates: {e}")
             errors[fetcher.name] = str(e)

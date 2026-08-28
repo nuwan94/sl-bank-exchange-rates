@@ -85,7 +85,22 @@ class BankFetcher:
                     # the server-rendered HTML. "networkidle" never fires on some
                     # of these pages (e.g. combank.lk's chat widget long-polls).
                     page.goto(self.url, wait_until="domcontentloaded", timeout=30000)
-                    return page.content()
+                    try:
+                        page.wait_for_selector("table", timeout=10000)
+                    except Exception:
+                        pass  # fall through with whatever loaded; caller reports empty results
+
+                    html = page.content()
+                    if "<table" not in html:
+                        # One retry with a fresh navigation — occasionally the WAF
+                        # serves a transient interstitial instead of the real page.
+                        page.goto(self.url, wait_until="domcontentloaded", timeout=30000)
+                        try:
+                            page.wait_for_selector("table", timeout=10000)
+                        except Exception:
+                            pass
+                        html = page.content()
+                    return html
                 finally:
                     browser.close()
         except Exception as e:
