@@ -8,6 +8,20 @@ export const bankLabels = {
   seylan: "Seylan",
 };
 
+// Fixed per-bank chart color, validated for categorical use (colorblind-safe
+// adjacent separation + light-surface contrast) — see dataviz skill palette.
+// Assigned by bank identity, not array position, so a bank's color never
+// shifts when another bank drops in/out of the visible series.
+export const bankColors = {
+  peoples: "#2a78d6", // blue
+  sampath: "#eb6834", // orange
+  hnb: "#1baf7a", // aqua
+  ndb: "#eda100", // yellow
+  boc: "#e87ba4", // magenta
+  combank: "#008300", // green
+  seylan: "#4a3aa7", // violet
+};
+
 export const bankSourceUrls = {
   peoples: "https://www.peoplesbank.lk/exchange-rates/",
   sampath: "https://www.sampath.lk/rates-and-charges?activeTab=exchange-rates",
