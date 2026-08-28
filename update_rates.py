@@ -102,8 +102,7 @@ def prune_entries(entries, cutoff_dt):
     ]
 
 
-def log_history_if_changed(rates, fetched_at):
-    history = load_history()
+def log_history_if_changed(rates, fetched_at, history):
     if "entries" not in history:
         history["entries"] = []
 
@@ -148,12 +147,19 @@ def main():
 
     rates, errors = fetch_all_rates()
 
-    payload = {"fetched_at": fetched_at, "rates": rates}
+    history = load_history()
+    # The full snapshot as of the previous run — before this run's data
+    # overwrites it below. Exposed so the UI can show "moved since last
+    # fetch" indicators without the client having to reconstruct it from
+    # the (deliberately sparse) history entries.
+    previous_rates = history.get("latest")
+
+    payload = {"fetched_at": fetched_at, "rates": rates, "previous_rates": previous_rates}
     RATES_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"✅ Written {RATES_PATH}")
 
     write_debug_errors(errors, fetched_at)
-    log_history_if_changed(rates, fetched_at)
+    log_history_if_changed(rates, fetched_at, history)
 
 
 if __name__ == "__main__":

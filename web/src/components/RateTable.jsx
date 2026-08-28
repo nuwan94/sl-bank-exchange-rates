@@ -3,6 +3,7 @@ import { getCurrencyName } from "../utils/index.js";
 
 export default function RateTable({
   rates,
+  previousRates,
   bankKeys,
   currencyOrder,
   bankLabels,
@@ -112,18 +113,39 @@ export default function RateTable({
                   {currency.code}
                   <div className="text-xs text-slate-500">{currency.name}</div>
                 </td>
-                {values.map((value, index) => (
-                  <td
-                    key={bankKeys[index]}
-                    className={`text-right px-3 py-3 border-l border-slate-300 ${
-                      value != null && maxValue != null && value === maxValue
-                        ? "bg-green-50 font-semibold text-slate-900"
-                        : "text-slate-700"
-                    }`}
-                  >
-                    {formatRate(value)}
-                  </td>
-                ))}
+                {values.map((value, index) => {
+                  const bank = bankKeys[index];
+                  const previousValue =
+                    previousRates?.[bank]?.[currency.code] ?? null;
+                  const trend =
+                    value != null && previousValue != null && value !== previousValue
+                      ? value > previousValue
+                        ? "up"
+                        : "down"
+                      : null;
+                  return (
+                    <td
+                      key={bank}
+                      className={`text-right px-3 py-3 border-l border-slate-300 ${
+                        value != null && maxValue != null && value === maxValue
+                          ? "bg-green-50 font-semibold text-slate-900"
+                          : "text-slate-700"
+                      }`}
+                    >
+                      {trend ? (
+                        <span
+                          className={`mr-1 ${
+                            trend === "up" ? "text-emerald-600" : "text-red-600"
+                          }`}
+                          title={`Was ${formatRate(previousValue)} as of the previous fetch`}
+                        >
+                          {trend === "up" ? "▲" : "▼"}
+                        </span>
+                      ) : null}
+                      {formatRate(value)}
+                    </td>
+                  );
+                })}
               </tr>
             );
           })}

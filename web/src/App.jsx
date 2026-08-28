@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import RateTable from "./components/RateTable.jsx";
+import BestRateCard from "./components/BestRateCard.jsx";
 import ChartSection from "./components/ChartSection.jsx";
 import Footer from "./components/Footer.jsx";
 import TabNav from "./components/TabNav.jsx";
@@ -17,6 +18,7 @@ const TAB_CHARTS = "charts";
 
 export default function App() {
   const [rates, setRates] = useState({});
+  const [previousRates, setPreviousRates] = useState({});
   const [fetchedAt, setFetchedAt] = useState("unknown");
   const [historyEntries, setHistoryEntries] = useState([]);
   const [activeTab, setActiveTab] = useState(TAB_RATES);
@@ -32,6 +34,7 @@ export default function App() {
         if (!ratesResponse.ok) throw new Error(await ratesResponse.text());
         const ratesData = await ratesResponse.json();
         setRates(ratesData.rates || {});
+        setPreviousRates(ratesData.previous_rates || {});
         setFetchedAt(ratesData.fetched_at || "unknown");
 
         const historyResponse = await fetch("/data/history.json", {
@@ -81,9 +84,19 @@ export default function App() {
     <div className="space-y-5">
       <TabNav activeTab={activeTab} onTabChange={setActiveTab} />
 
-      <div className={activeTab !== TAB_RATES ? "hidden" : ""}>
+      <div className={`space-y-5 ${activeTab !== TAB_RATES ? "hidden" : ""}`}>
+        {!loading && bankKeys.length > 0 ? (
+          <BestRateCard
+            rates={rates}
+            bankKeys={bankKeys}
+            bankLabels={bankLabels}
+            bankSourceUrls={bankSourceUrls}
+            formatRate={formatRate}
+          />
+        ) : null}
         <RateTable
           rates={rates}
+          previousRates={previousRates}
           bankKeys={bankKeys}
           currencyOrder={currencyOrder}
           bankLabels={bankLabels}
