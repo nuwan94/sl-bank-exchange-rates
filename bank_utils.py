@@ -11,20 +11,15 @@ DEFAULT_HEADERS = {
 
 
 class BankFetcher:
-    def __init__(self, name: str, url: str, headers: dict | None = None, use_browser: bool = False):
+    def __init__(self, name: str, url: str, headers: dict | None = None):
         self.name = name
         self.url = url
         self.headers = {**DEFAULT_HEADERS, **(headers or {})}
-        self.use_browser = use_browser
         self._cached_text: str | None = None
         self._cached_json: object | None = None
 
     def fetch_text(self) -> str:
         if self._cached_text is None:
-            if self.use_browser:
-                self._cached_text = self._fetch_text_via_browser()
-                return self._cached_text
-
             urls_to_try = [self.url]
             if "#" in self.url:
                 urls_to_try.append(self.url.split("#", 1)[0])
@@ -57,54 +52,6 @@ class BankFetcher:
 
             raise RuntimeError(f"Unable to fetch {self.name}")
         return self._cached_text
-
-    def _fetch_text_via_browser(self) -> str:
-        """Fetch via a real headless browser.
-
-        Some bank sites (e.g. BOC, ComBank) sit behind a WAF that blocks
-        plain HTTP clients outright (403) but allows real browsers through,
-        regardless of the requesting IP. Playwright is only imported here so
-        the plain-urllib path (used by most banks) never needs it installed.
-        """
-        try:
-            from playwright.sync_api import sync_playwright
-        except ImportError as e:
-            raise RuntimeError(
-                f"Playwright is required to fetch {self.name} "
-                "(install with `pip install playwright && playwright install --with-deps chromium`)"
-            ) from e
-
-        try:
-            with sync_playwright() as p:
-                browser = p.chromium.launch()
-                try:
-                    page = browser.new_page(
-                        user_agent=self.headers.get("User-Agent", DEFAULT_USER_AGENT)
-                    )
-                    # domcontentloaded is enough — the rate tables are present in
-                    # the server-rendered HTML. "networkidle" never fires on some
-                    # of these pages (e.g. combank.lk's chat widget long-polls).
-                    page.goto(self.url, wait_until="domcontentloaded", timeout=30000)
-                    try:
-                        page.wait_for_selector("table", timeout=10000)
-                    except Exception:
-                        pass  # fall through with whatever loaded; caller reports empty results
-
-                    html = page.content()
-                    if "<table" not in html:
-                        # One retry with a fresh navigation — occasionally the WAF
-                        # serves a transient interstitial instead of the real page.
-                        page.goto(self.url, wait_until="domcontentloaded", timeout=30000)
-                        try:
-                            page.wait_for_selector("table", timeout=10000)
-                        except Exception:
-                            pass
-                        html = page.content()
-                    return html
-                finally:
-                    browser.close()
-        except Exception as e:
-            raise RuntimeError(f"Browser error fetching {self.name}: {e}") from e
 
     def fetch_json(self):
         if self._cached_json is None:

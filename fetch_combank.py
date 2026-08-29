@@ -88,14 +88,20 @@ def parse_combank_rates(html: str) -> dict[str, float]:
     return rates
 
 
+# NOTE: combank.lk's WAF returns 403 to requests from GitHub Actions' IP
+# ranges specifically (confirmed via a headless-browser fetch getting the
+# same 403 from that same environment — this isn't a client-fingerprint
+# thing, it's an IP-level block). Fails cleanly and shows up in
+# debug_errors.json; the rest of the pipeline already handles a missing
+# bank gracefully. Would need a self-hosted runner or a residential proxy
+# to actually fetch this bank from CI.
 class ComBankBankFetcher(BankFetcher):
     def __init__(self):
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         }
-        # combank.lk's WAF returns 403 for plain HTTP clients; a real browser passes.
-        super().__init__("combank", COMBANK_URL, headers=headers, use_browser=True)
+        super().__init__("combank", COMBANK_URL, headers=headers)
 
     def fetch_all_rates(self) -> dict[str, float]:
         return parse_combank_rates(self.fetch_text())
