@@ -138,7 +138,13 @@ def log_history_if_changed(rates, fetched_at, history):
     cutoff_dt = datetime.fromisoformat(fetched_at) - timedelta(days=ENTRY_RETENTION_DAYS)
     history["entries"] = prune_entries(history["entries"], cutoff_dt)
 
-    history["latest"] = rates
+    # Merge, don't overwrite: a bank that fails this run (e.g. BOC/ComBank's
+    # WAF block) must keep its last successfully-fetched values here, not
+    # lose them just because some other bank changed and triggered this
+    # write. Otherwise "previous_rates" (below, and in rates.json) would
+    # compare a recovering bank against nothing, or against an unrelated
+    # bank's failure cycle, instead of its own last available data.
+    history["latest"] = {**(history.get("latest") or {}), **rates}
     HISTORY_PATH.write_text(json.dumps(history, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"✅ Logged rate change to {HISTORY_PATH}")
 

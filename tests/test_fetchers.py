@@ -1,7 +1,10 @@
+import tempfile
 import unittest
+from pathlib import Path
 
+import update_rates
 from fetch_combank import parse_combank_rates
-from update_rates import compact_rates
+from update_rates import compact_rates, log_history_if_changed
 
 
 class ComBankParserTests(unittest.TestCase):
@@ -60,6 +63,34 @@ class ComBankParserTests(unittest.TestCase):
         compacted = compact_rates(current, previous)
 
         self.assertEqual(compacted, {})
+
+    def test_latest_snapshot_keeps_failed_banks_last_known_values(self):
+        # A bank that fails to fetch this run (e.g. boc/combank behind a WAF)
+        # must not lose its last-known values from history["latest"] just
+        # because a different bank changed and triggered a write — otherwise
+        # a later "moved since last fetch" comparison for that bank would
+        # compare against nothing, or against a stale run from before the
+        # bank even existed in the data, instead of its own last fetch.
+        with tempfile.TemporaryDirectory() as tmpdir:
+            original_path = update_rates.HISTORY_PATH
+            update_rates.HISTORY_PATH = Path(tmpdir) / "history.json"
+            try:
+                history = {
+                    "entries": [],
+                    "latest": {
+                        "boc": {"USD": 320.0},
+                        "sampath": {"USD": 300.0},
+                    },
+                }
+                # This run: sampath changed, boc failed to fetch (absent).
+                new_rates = {"sampath": {"USD": 301.0}}
+
+                log_history_if_changed(new_rates, "2026-01-01T00:00:00+05:30", history)
+
+                self.assertEqual(history["latest"]["boc"], {"USD": 320.0})
+                self.assertEqual(history["latest"]["sampath"], {"USD": 301.0})
+            finally:
+                update_rates.HISTORY_PATH = original_path
 
 
 if __name__ == "__main__":
