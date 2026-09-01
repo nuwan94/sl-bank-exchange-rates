@@ -1,6 +1,7 @@
 {
-  "fetched_at": "2026-09-01T15:48:42.899465+05:30",
+  "fetched_at": "2026-09-01T20:32:11.704900+05:30",
   "errors": {
+    "sampath": "Unexpected error fetching sampath: The read operation timed out",
     "boc": "HTTP error fetching boc: 403 Forbidden",
     "combank": "HTTP error fetching combank: 403 Forbidden"
   }
