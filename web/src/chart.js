@@ -1,7 +1,64 @@
 import Chart from "chart.js/auto";
+import zoomPlugin from "chartjs-plugin-zoom";
 import { sortBankKeys, bankLabels, bankColors } from "./utils/index.js";
 
+Chart.register(zoomPlugin);
+
 const FALLBACK_COLOR = "#52514e"; // secondary ink — only if an unknown bank shows up
+const CANVAS_ID = "rateChart";
+const Y_AXIS_PADDING = 5;
+
+function getChartInstance() {
+  const canvas = document.getElementById(CANVAS_ID);
+  return canvas?.getContext("2d")?._chartInstance ?? null;
+}
+
+// Zooming/panning the x-axis leaves the y-axis fixed to the full dataset's
+// range by default, which makes a zoomed-in window look artificially flat.
+// Recompute y bounds from whatever's actually visible instead.
+function rescaleYToVisibleWindow(chart, dataLength) {
+  const xScale = chart.scales.x;
+  if (!xScale) return;
+  const startIdx = Math.max(0, Math.floor(xScale.min ?? 0));
+  const endIdx = Math.min(dataLength - 1, Math.ceil(xScale.max ?? dataLength - 1));
+
+  let min = Infinity;
+  let max = -Infinity;
+  for (const dataset of chart.data.datasets) {
+    const data = dataset.data;
+    // A series only carries a point where its rate changed (spanGaps), so
+    // the line may be flat through this whole window with no literal point
+    // in it — carry forward whatever value was in effect entering the window.
+    let carried = null;
+    for (let i = 0; i <= startIdx; i++) {
+      if (typeof data[i] === "number") carried = data[i];
+    }
+    if (carried != null) {
+      min = Math.min(min, carried);
+      max = Math.max(max, carried);
+    }
+    for (let i = startIdx; i <= endIdx; i++) {
+      const value = data[i];
+      if (typeof value === "number" && !Number.isNaN(value)) {
+        min = Math.min(min, value);
+        max = Math.max(max, value);
+      }
+    }
+  }
+  if (!Number.isFinite(min) || !Number.isFinite(max)) return;
+
+  chart.options.scales.y.min = Math.max(0, min - Y_AXIS_PADDING);
+  chart.options.scales.y.max = max + Y_AXIS_PADDING;
+  chart.update("none");
+}
+
+/** Restores the full time range and the matching y-axis scale. */
+export function resetChartZoom() {
+  const chart = getChartInstance();
+  if (!chart) return;
+  chart.resetZoom();
+  rescaleYToVisibleWindow(chart, chart.data.labels.length);
+}
 
 function formatTimestamp(timestamp) {
   const d = new Date(timestamp);
@@ -74,9 +131,8 @@ export function renderUsdChart(entries, containerId = "chart-container") {
     };
   });
 
-  const canvasId = "rateChart";
-  container.innerHTML = `<canvas id="${canvasId}"></canvas>`;
-  const ctx = document.getElementById(canvasId).getContext("2d");
+  container.innerHTML = `<canvas id="${CANVAS_ID}"></canvas>`;
+  const ctx = document.getElementById(CANVAS_ID).getContext("2d");
 
   if (ctx._chartInstance) {
     try {
@@ -93,10 +149,10 @@ export function renderUsdChart(entries, containerId = "chart-container") {
   );
   const minValue = numericValues.length ? Math.min(...numericValues) : null;
   const maxValue = numericValues.length ? Math.max(...numericValues) : null;
-  const axisPadding = 5;
   const yMin =
-    minValue != null ? Math.max(0, minValue - axisPadding) : undefined;
-  const yMax = maxValue != null ? maxValue + axisPadding : undefined;
+    minValue != null ? Math.max(0, minValue - Y_AXIS_PADDING) : undefined;
+  const yMax = maxValue != null ? maxValue + Y_AXIS_PADDING : undefined;
+  const dataLength = labels.length;
 
   const chart = new Chart(ctx, {
     type: "line",
@@ -138,6 +194,24 @@ export function renderUsdChart(entries, containerId = "chart-container") {
             // Values lead, labels follow: "324.19  Peoples" not "Peoples: 324.19"
             label: (item) =>
               `${item.formattedValue}  ${item.dataset.label}`,
+          },
+        },
+        zoom: {
+          limits: {
+            // Index bounds on the category x-axis — can't pan/zoom past
+            // the actual data, and can't zoom in past a few points.
+            x: { min: 0, max: dataLength - 1, minRange: 3 },
+          },
+          pan: {
+            enabled: true,
+            mode: "x",
+            onPanComplete: ({ chart }) => rescaleYToVisibleWindow(chart, dataLength),
+          },
+          zoom: {
+            wheel: { enabled: true, modifierKey: "ctrl" }, // plain scroll still scrolls the page
+            pinch: { enabled: true },
+            mode: "x",
+            onZoomComplete: ({ chart }) => rescaleYToVisibleWindow(chart, dataLength),
           },
         },
       },
