@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-09-08T13:15:41.174897+05:30",
+  "fetched_at": "2026-09-08T18:04:10.213330+05:30",
   "errors": {
     "boc": "HTTP error fetching boc: 403 Forbidden",
     "combank": "HTTP error fetching combank: 403 Forbidden"
