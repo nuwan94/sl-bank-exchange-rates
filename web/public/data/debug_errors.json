@@ -1,7 +1,6 @@
 {
-  "fetched_at": "2026-09-17T23:54:44.503932+05:30",
+  "fetched_at": "2026-09-18T03:04:59.313981+05:30",
   "errors": {
-    "peoples": "No rates parsed (fetched 201695 chars, preview: '<!DOCTYPE html>\\r <html lang=\"en\">\\r \\r <head>\\r     <meta charset=\"UTF-8\">\\r     <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\\r     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\\r     <meta name=\"google-site-verification\" content=\"TZ5jN0xGf0d3AoMqkwzBpYI7yezv-8PhdoEDylNIF')",
     "boc": "HTTP error fetching boc: 403 Forbidden",
     "combank": "HTTP error fetching combank: 403 Forbidden"
   }
