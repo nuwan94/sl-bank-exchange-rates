@@ -1,7 +1,8 @@
 {
-  "fetched_at": "2026-09-21T06:49:52.689149+05:30",
+  "fetched_at": "2026-09-21T12:13:32.564015+05:30",
   "errors": {
     "boc": "HTTP error fetching boc: 403 Forbidden",
-    "combank": "HTTP error fetching combank: 403 Forbidden"
+    "combank": "HTTP error fetching combank: 403 Forbidden",
+    "seylan": "Unexpected error fetching seylan: The read operation timed out"
   }
 }
