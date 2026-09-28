@@ -1,6 +1,7 @@
 {
-  "fetched_at": "2026-09-28T12:44:55.381288+05:30",
+  "fetched_at": "2026-09-28T21:13:26.848455+05:30",
   "errors": {
+    "ndb": "Unexpected error fetching ndb: The read operation timed out",
     "boc": "HTTP error fetching boc: 403 Forbidden",
     "combank": "HTTP error fetching combank: 403 Forbidden"
   }
