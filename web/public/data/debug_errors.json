@@ -1,7 +1,6 @@
 {
-  "fetched_at": "2026-10-05T01:48:29.986456+05:30",
+  "fetched_at": "2026-10-05T04:54:47.399801+05:30",
   "errors": {
-    "peoples": "Unexpected error fetching peoples: The read operation timed out",
     "boc": "HTTP error fetching boc: 403 Forbidden",
     "combank": "HTTP error fetching combank: 403 Forbidden"
   }
