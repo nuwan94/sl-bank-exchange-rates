@@ -1,7 +1,6 @@
 {
-  "fetched_at": "2026-10-04T03:11:36.882826+05:30",
+  "fetched_at": "2026-10-04T05:49:42.447281+05:30",
   "errors": {
-    "peoples": "Network error fetching peoples: [Errno 104] Connection reset by peer",
     "boc": "HTTP error fetching boc: 403 Forbidden",
     "combank": "HTTP error fetching combank: 403 Forbidden"
   }
