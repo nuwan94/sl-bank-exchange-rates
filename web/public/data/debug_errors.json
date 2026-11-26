@@ -1,7 +1,6 @@
 {
-  "fetched_at": "2026-11-26T05:12:38.826902+05:30",
+  "fetched_at": "2026-11-26T12:00:47.852371+05:30",
   "errors": {
-    "peoples": "No rates parsed (fetched 270413 chars, preview: '<!DOCTYPE html> <html lang=\"en-US\"> <head> \\t<meta charset=\"UTF-8\"> \\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, viewport-fit=cover\" />\\t\\t<title>Exchange Rates &#8211; People&#039;s Bank</title> <meta name=\\'robots\\' content=\\'max-image-preview:large\\' /> <link rel=\"alternate\" hr')",
     "boc": "HTTP error fetching boc: 403 Forbidden",
     "combank": "HTTP error fetching combank: 403 Forbidden"
   }
